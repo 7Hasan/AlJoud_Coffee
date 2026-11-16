@@ -2,27 +2,24 @@
 
 body {
     font-family: 'Cairo', sans-serif;
+    background-color: #0f0e0d;
+    color: #f8fafc;
 }
 
-/* تخصيص مظهر النوافذ المنبثقة وحركاتها */
 @keyframes scaleUp {
-    from { transform: scale(0.9); opacity: 0; }
+    from { transform: scale(0.92); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
 }
 
 .animate-in {
-    animation: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* إخفاء شريط التمرير للجمالية */
+/* تخصيص التمرير */
 ::-webkit-scrollbar {
     width: 4px;
-    height: 4px;
-}
-::-webkit-scrollbar-track {
-    background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: #332f2b;
     border-radius: 4px;
 }

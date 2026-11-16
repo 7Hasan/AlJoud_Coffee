@@ -3,126 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منيو كافيه البرود</title>
-    <!-- Tailwind CSS -->
+    <title>كافيه الجُود | تجربة استثنائية</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome الأيقونات -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- ملف الـ CSS الخارجي -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 text-slate-800 pb-28">
+<body class="bg-[#0f0e0d] text-slate-100 pb-32">
 
-    <!-- الهيدر مع الشعار المرفق -->
-    <header class="bg-white shadow-sm sticky top-0 z-40 border-b border-slate-100">
+    <!-- الهيدر الفاخر مع الشعار -->
+    <header class="glass-nav sticky top-0 z-40 border-b border-white/10 backdrop-blur-xl bg-[#0f0e0d]/80">
         <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <!-- الشعار المرفق -->
-                <img src="Screenshot_٢٠٢٦١١١٧-٠٠٤٣٣١_Instagram-removebg-preview.png" alt="شعار الكافي" class="w-11 h-11 rounded-full object-cover border-2 border-amber-900/20 shadow-sm">
+                <div class="relative">
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-amber-700 rounded-full blur opacity-70 animate-pulse"></div>
+                    <!-- ضع صورتك هنا وسمها logo.png -->
+                    <img src="logo.png" alt="شعار كافيه الجود" class="relative w-11 h-11 rounded-full object-cover border-2 border-amber-500/50 shadow-lg">
+                </div>
                 <div>
-                    <h1 class="font-bold text-sm text-amber-900">كافيه البرود</h1>
-                    <p class="text-[10px] text-slate-400">اطلب، استمتع، واجمع ختماتك</p>
+                    <h1 class="font-black text-sm tracking-wide text-amber-500">كافيه البَـرود</h1>
+                    <p class="text-[10px] text-slate-400 tracking-wider">الروقـان عـلى أصولـه</p>
                 </div>
             </div>
-            <!-- زر فتح كرت الولاء -->
-            <button onclick="app.toggleLoyalty(true)" class="bg-amber-50 text-amber-900 border border-amber-200 px-3 py-1.5 rounded-2xl text-xs font-bold flex items-center gap-1.5 shadow-sm active:scale-95 transition">
-                <i class="fa-solid fa-award text-amber-700"></i> كرت الولاء (<span id="stampsCount">0</span>/6)
+            
+            <button onclick="app.toggleLoyalty(true)" class="bg-gradient-to-r from-amber-600 to-amber-800 text-white px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-amber-900/40 active:scale-95 transition-all duration-300 border border-amber-400/20">
+                <i class="fa-solid fa-award text-amber-200"></i> كرت الولاء (<span id="stampsCount">0</span>/6)
             </button>
         </div>
     </header>
 
     <!-- المحتوى الرئيسي -->
-    <main class="max-w-md mx-auto p-4 space-y-4">
+    <main class="max-w-md mx-auto p-4 space-y-5">
         
-        <!-- قسم تحديد المزاج -->
-        <div class="bg-gradient-to-br from-amber-900 to-amber-950 text-white p-4 rounded-3xl shadow-lg relative overflow-hidden">
-            <div class="relative z-10">
-                <h2 class="font-bold text-sm mb-1"><i class="fa-solid fa-mug-hot text-amber-400"></i> وش مزاجك اليوم؟</h2>
-                <p class="text-xs text-amber-100/80 mb-3">خل الذكاء الاصطناعي يقترح عليك المشروب الأنسب لحالتك!</p>
-                <button onclick="app.openMoodModal()" class="bg-white text-amber-950 text-xs font-bold px-4 py-2 rounded-xl shadow transition active:scale-95">
-                    اختر لي المشروب ✨
+        <!-- قسم النبذة والـ Slogan الفخم -->
+        <section class="relative bg-gradient-to-br from-amber-950/60 via-[#161412] to-[#121110] p-5 rounded-[2.5rem] border border-amber-500/20 shadow-2xl overflow-hidden text-center space-y-2">
+            <div class="absolute -right-10 -top-10 w-32 h-32 bg-amber-600/10 rounded-full blur-3xl"></div>
+            <span class="inline-block bg-amber-500/10 text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full border border-amber-500/20 tracking-widest uppercase">مرحباً بكم في عالم البرود</span>
+            <h2 class="font-black text-lg text-white leading-tight">حيث تلتئم تفاصيل المزاج الهادئ ☕</h2>
+            <p class="text-xs text-slate-400 leading-relaxed px-2">نقدم لك أجود أنواع القهوة المختصة والحلويات الطازجة مصممة خصيصاً لتناسب ذائقتك الفاخرة.</p>
+        </section>
+
+        <!-- مختبر المزاج الذكي -->
+        <div class="relative bg-gradient-to-r from-amber-900 to-amber-950 text-white p-4 rounded-3xl shadow-xl overflow-hidden border border-amber-700/30">
+            <div class="relative z-10 flex justify-between items-center">
+                <div class="space-y-1">
+                    <h3 class="font-bold text-xs flex items-center gap-1.5 text-amber-300">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> وش مزاجك اليوم؟
+                    </h3>
+                    <p class="text-[11px] text-amber-100/70">دعنا نختار المشروب الأنسب لحالتك الآن</p>
+                </div>
+                <button onclick="app.openMoodModal()" class="bg-white text-amber-950 text-xs font-black px-4 py-2.5 rounded-2xl shadow-lg active:scale-95 transition-all duration-300 hover:bg-amber-100">
+                    اختار لي ✨
                 </button>
             </div>
         </div>
 
         <!-- قائمة المنيو -->
         <div class="space-y-3">
-            <h3 class="font-bold text-slate-700 text-xs px-1">قائمة المشروبات والحلويات</h3>
+            <div class="flex justify-between items-center px-1">
+                <h3 class="font-bold text-slate-300 text-xs tracking-wide">قائمة المشروبات والحلويات</h3>
+                <span class="text-[10px] text-amber-500 font-bold">طازج يومياً</span>
+            </div>
             <div id="menuList" class="space-y-3">
-                <!-- يتم تعبئتها ديناميكياً من الـ JS -->
+                <!-- يتم تعبئتها ديناميكياً -->
             </div>
         </div>
+
+        <!-- قسم التواصل الاجتماعي وأزرار الاتصال -->
+        <section class="bg-[#171513] border border-white/5 p-5 rounded-[2.5rem] space-y-4 shadow-xl">
+            <h3 class="text-center font-bold text-xs text-slate-300 tracking-wider">تواصل معنا & تابع حساباتنا</h3>
+            
+            <!-- أزرار السوشيال ميديا -->
+            <div class="grid grid-cols-3 gap-2">
+                <a href="https://instagram.com" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-[#201d1a] border border-white/5 hover:border-amber-500/40 text-slate-300 hover:text-amber-400 transition-all duration-300 group">
+                    <i class="fa-brands fa-instagram text-lg group-hover:scale-125 transition-transform"></i>
+                    <span class="text-[10px] mt-1 font-semibold">انستقرام</span>
+                </a>
+                <a href="https://tiktok.com" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-[#201d1a] border border-white/5 hover:border-amber-500/40 text-slate-300 hover:text-amber-400 transition-all duration-300 group">
+                    <i class="fa-brands fa-tiktok text-lg group-hover:scale-125 transition-transform"></i>
+                    <span class="text-[10px] mt-1 font-semibold">تيك توك</span>
+                </a>
+                <a href="https://maps.google.com" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-[#201d1a] border border-white/5 hover:border-amber-500/40 text-slate-300 hover:text-amber-400 transition-all duration-300 group">
+                    <i class="fa-solid fa-location-dot text-lg group-hover:scale-125 transition-transform"></i>
+                    <span class="text-[10px] mt-1 font-semibold">موقعنا</span>
+                </a>
+            </div>
+
+            <!-- زر خيارات الاتصال المتقدمة -->
+            <button onclick="app.openContactModal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-700 text-white py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/30 active:scale-95 transition-all duration-300">
+                <i class="fa-solid fa-headset text-sm"></i> خدمة العملاء (اتصال، رسائل، واتساب)
+            </button>
+        </section>
+
+        <!-- حفظ الحقوق -->
+        <footer class="text-center pt-2 pb-4 space-y-1">
+            <p class="text-[11px] text-slate-500 font-medium">جميع الحقوق محفوظة © 2026 <span class="text-amber-500 font-bold">كافيه البرود</span></p>
+            <p class="text-[9px] text-slate-600">تصميم وتطوير برمجي متقدم احترافي</p>
+        </footer>
     </main>
 
-    <!-- سريط السلة العائم -->
-    <div id="cartBar" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 shadow-2xl z-40 hidden">
+    <!-- شريط السلة العائم -->
+    <div id="cartBar" class="fixed bottom-0 left-0 right-0 bg-[#161412]/95 backdrop-blur-xl border-t border-white/10 p-4 shadow-2xl z-40 hidden transition-all duration-300">
         <div class="max-w-md mx-auto flex justify-between items-center">
             <div>
-                <span class="text-[10px] text-slate-400 block">إجمالي الطلب:</span>
-                <span class="font-bold text-amber-900 text-base"><span id="cartTotalSum">0</span> ريال</span>
+                <span class="text-[10px] text-slate-400 block">إجمالي السلة:</span>
+                <span class="font-extrabold text-amber-400 text-base"><span id="cartTotalSum">0</span> ريال</span>
             </div>
-            <button onclick="app.sendToWhatsApp()" class="bg-emerald-600 text-white px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/20 active:scale-95 transition">
+            <button onclick="app.sendToWhatsApp()" class="bg-emerald-600 text-white px-5 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/30 active:scale-95 transition-all duration-300 hover:bg-emerald-500">
                 <i class="fa-brands fa-whatsapp text-base"></i> إرسال الطلب للواتساب
             </button>
         </div>
     </div>
 
-    <!-- نافذة كرت الولاء (QR والختمات بالشعار) -->
-    <div id="loyaltyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white w-full max-w-sm rounded-[2rem] p-6 space-y-4 shadow-2xl border border-slate-100 animate-in">
+    <!-- نافذة كرت الولاء (QR والختمات) -->
+    <div id="loyaltyModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#181614] border border-white/10 w-full max-w-sm rounded-[2.5rem] p-6 space-y-4 shadow-2xl animate-in">
             <div class="flex justify-between items-center">
-                <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
-                    <img src="Screenshot_٢٠٢٦١١١٧-٠٠٤٣٣١_Instagram-removebg-preview.png" class="w-6 h-6 rounded-full object-cover"> كرت الولاء الرقمي
+                <h3 class="font-bold text-sm text-slate-200 flex items-center gap-2">
+                    <img src="logo.png" class="w-6 h-6 rounded-full object-cover border border-amber-500"> كرت الولاء الرقمي
                 </h3>
-                <button onclick="app.toggleLoyalty(false)" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="app.toggleLoyalty(false)" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-white/10 transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <p class="text-xs text-slate-500 leading-relaxed">اجمع 6 ختمات واحصل على المشروب السابع مجاناً! امسح QR الكاشير اليومي لتسجيل الختمة.</p>
+            <p class="text-xs text-slate-400 leading-relaxed">اجمع 6 ختمات بمسح QR اليومي واحصل على مشروبك السابع مجاناً!</p>
             
-            <!-- شبكة الختمات (تستخدم الشعار المرفق كختم) -->
-            <div class="grid grid-cols-3 gap-3 py-2" id="stampsGrid">
-                <!-- يتم تعبئتها بالـ JS -->
-            </div>
+            <!-- شبكة الختمات (تستخدم الشعار المرفق) -->
+            <div class="grid grid-cols-3 gap-3 py-2" id="stampsGrid"></div>
 
-            <!-- محاكي مسح الـ QR اليومي -->
-            <div class="bg-amber-50/60 border border-amber-200/60 p-3 rounded-2xl space-y-2">
-                <div class="flex justify-between items-center text-xs font-bold text-amber-900">
-                    <span><i class="fa-solid fa-qrcode"></i> مسح QR الكاشير اليومي</span>
-                    <span id="qrDateBadge" class="text-[10px] bg-amber-200/50 px-2 py-0.5 rounded-md"></span>
+            <!-- محاكي الـ QR اليومي -->
+            <div class="bg-amber-950/30 border border-amber-500/20 p-3.5 rounded-2xl space-y-2">
+                <div class="flex justify-between items-center text-xs font-bold text-amber-400">
+                    <span><i class="fa-solid fa-qrcode"></i> QR اليومي المتغير</span>
+                    <span id="qrDateBadge" class="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-md text-amber-300"></span>
                 </div>
                 <div class="flex gap-2">
-                    <input type="password" id="cashierPinInput" placeholder="رمز تحقق الكاشير" class="flex-1 bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs text-center focus:outline-none focus:border-amber-600">
-                    <button onclick="app.verifyAndAddStamp()" class="bg-amber-900 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md active:scale-95 transition">اعتماد ختمة</button>
+                    <input type="password" id="cashierPinInput" placeholder="رمز تحقق الكاشير" class="flex-1 bg-black/40 border border-amber-500/30 rounded-xl px-3 py-2 text-xs text-center text-white focus:outline-none focus:border-amber-500">
+                    <button onclick="app.verifyAndAddStamp()" class="bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md active:scale-95 transition hover:bg-amber-500">اعتمد</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- نافذة خيارات التواصل الشاملة (اتصال، رسائل، واتساب) -->
+    <div id="contactModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#181614] border border-white/10 w-full max-w-sm rounded-[2.5rem] p-6 space-y-4 shadow-2xl animate-in text-center">
+            <div class="w-12 h-12 mx-auto rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl border border-emerald-500/20">
+                <i class="fa-solid fa-headset"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-sm text-white">خدمة عملاء كافيه البرود</h3>
+                <p class="text-xs text-slate-400 mt-1">اختر الطريقة المناسبة للتواصل معنا فوراً:</p>
+            </div>
+            
+            <div class="space-y-2 pt-2">
+                <!-- اتصال هاتفي -->
+                <a href="tel:+967700000000" class="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 text-xs font-bold text-slate-200 transition">
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-phone text-amber-500"></i> اتصال هاتفي مباشر</span>
+                    <i class="fa-solid fa-chevron-left text-[10px] text-slate-500"></i>
+                </a>
+                <!-- إرسال رسالة نصية SMS -->
+                <a href="sms:+967700000000" class="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 text-xs font-bold text-slate-200 transition">
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-message text-sky-500"></i> إرسال رسالة نصية (SMS)</span>
+                    <i class="fa-solid fa-chevron-left text-[10px] text-slate-500"></i>
+                </a>
+                <!-- دردشة واتساب -->
+                <a href="https://wa.me/967700000000" target="_blank" class="w-full flex items-center justify-between p-3.5 rounded-2xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-xs font-bold text-emerald-400 transition">
+                    <span class="flex items-center gap-2.5"><i class="fa-brands fa-whatsapp text-base"></i> دردشة خدمة العملاء (واتساب)</span>
+                    <i class="fa-solid fa-chevron-left text-[10px] text-emerald-500"></i>
+                </a>
+            </div>
+
+            <button onclick="app.closeContactModal()" class="w-full bg-white/5 text-slate-400 py-3 rounded-2xl text-xs font-bold hover:bg-white/10 transition mt-2">إغلاق</button>
         </div>
     </div>
 
     <!-- نافذة مختبر المزاج -->
-    <div id="moodModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white w-full max-w-sm rounded-[2rem] p-6 space-y-4 shadow-2xl">
-            <h3 class="font-bold text-sm text-slate-800">✨ مختبر المزاج السريع</h3>
-            <p class="text-xs text-slate-500">اختر حالتك المزاجية الآن:</p>
-            <div class="space-y-2" id="moodOptionsList"></div>
-            <button onclick="app.closeMoodModal()" class="w-full bg-slate-100 text-slate-600 py-2.5 rounded-2xl text-xs font-bold">إغلاق</button>
+    <div id="moodModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#181614] border border-white/10 w-full max-w-sm rounded-[2.5rem] p-6 space-y-4 shadow-2xl animate-in">
+            <h3 class="font-bold text-sm text-white">✨ مختبر المزاج الذكي</h3>
+            <p class="text-xs text-slate-400">اختر حالتك الآن لنقترح عليك المشروب المناسب:</p>
+            <div class="space-y-2.5" id="moodOptionsList"></div>
+            <button onclick="app.closeMoodModal()" class="w-full bg-white/5 text-slate-400 py-3 rounded-2xl text-xs font-bold hover:bg-white/10 transition">إغلاق</button>
         </div>
     </div>
 
-    <!-- صندوق التنبيهات والرسائل المصمم (Custom Alert Modal) -->
-    <div id="customAlertModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-[100] flex items-center justify-center p-4 hidden">
-        <div class="bg-white w-full max-w-xs rounded-[2.5rem] p-6 text-center space-y-4 shadow-2xl animate-in scale-in">
-            <div id="alertIconContainer" class="w-16 h-16 mx-auto rounded-full flex items-center justify-center text-2xl shadow-inner">
-                <!-- أيقونة ديناميكية -->
-            </div>
+    <!-- صندوق التنبيهات المخصص الفخم -->
+    <div id="customAlertModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 hidden">
+        <div class="bg-[#181614] border border-white/10 w-full max-w-xs rounded-[2.5rem] p-6 text-center space-y-4 shadow-2xl animate-in">
+            <div id="alertIconContainer" class="w-16 h-16 mx-auto rounded-full flex items-center justify-center text-2xl shadow-inner"></div>
             <div class="space-y-1">
-                <h4 id="alertTitle" class="font-bold text-base text-slate-800">عنوان الرسالة</h4>
-                <p id="alertMessage" class="text-xs text-slate-500 leading-relaxed">نص الرسالة التحذيرية أو التنبيهية يظهر هنا بوضوح تام.</p>
+                <h4 id="alertTitle" class="font-bold text-base text-white">عنوان الرسالة</h4>
+                <p id="alertMessage" class="text-xs text-slate-400 leading-relaxed">نص الرسالة يظهر هنا.</p>
             </div>
             <button onclick="app.closeAlert()" class="w-full py-3 rounded-2xl text-xs font-bold text-white shadow-lg transition active:scale-95" id="alertButton">حسناً</button>
         </div>
     </div>
 
-    <!-- ملف الـ JS الخارجي -->
     <script src="app.js"></script>
 </body>
 </html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منيو الكافي الرقمي</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js for Reactive UI -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 pb-24" x-data="cafeApp()">
+
+    <!-- الهيدر -->
+    <header class="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-100">
+        <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
+            <div>
+                <h1 class="font-bold text-lg text-amber-900">☕ اسم الكافي</h1>
+                <p class="text-xs text-gray-500">اطلب قهوتك واجمع ختمات الولاء</p>
+            </div>
+            <!-- زر فتح كرت الولاء -->
+            <button @click="showLoyalty = true" class="bg-amber-100 text-amber-800 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
+                <i class="fa-solid fa-stamp"></i> كرت الولاء (<span x-text="stamps"></span>/6)
+            </button>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي (المنيو) -->
+    <main class="max-w-md mx-auto p-4 space-y-4">
+        
+        <!-- قسم ترويجي / مزاجك اليوم -->
+        <div class="bg-gradient-to-r from-amber-800 to-amber-900 text-white p-4 rounded-2xl shadow-md">
+            <h2 class="font-bold text-sm mb-1"><i class="fa-solid fa-mug-hot"></i> وش مزاجك اليوم؟</h2>
+            <p class="text-xs text-amber-100 mb-3">خلينا نختار لك المشروب الأنسب لحالتك النفسية الآن!</p>
+            <button @click="openMoodModal()" class="bg-white text-amber-900 text-xs font-bold px-4 py-2 rounded-xl shadow transition active:scale-95">
+                اختار لي المشروب المناسب ✨
+            </button>
+        </div>
+
+        <!-- قائمة المنتجات -->
+        <div class="space-y-3">
+            <h3 class="font-bold text-gray-700 text-sm">قائمة المشروبات والحلويات</h3>
+            
+            <template x-for="item in menu" :key="item.id">
+                <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center">
+                    <div class="flex-1">
+                        <h4 class="font-bold text-sm text-gray-800" x-text="item.name"></h4>
+                        <p class="text-xs text-gray-500 mb-1" x-text="item.desc"></p>
+                        <span class="text-amber-900 font-bold text-xs" x-text="item.price + ' ريال'"></span>
+                    </div>
+                    <button @click="addToCart(item)" class="bg-amber-900 text-white w-9 h-9 rounded-xl flex items-center justify-center shadow hover:bg-amber-800 active:scale-95 transition">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                    </button>
+                </div>
+            </template>
+        </div>
+    </main>
+
+    <!-- شريط السلة العائم أسفل الشاشة -->
+    <div x-show="cart.length > 0" x-transition class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div>
+                <span class="text-xs text-gray-500 block">إجمالي الطلب:</span>
+                <span class="font-bold text-amber-900 text-base"><span x-text="cartTotal()"></span> ريال</span>
+            </div>
+            <button @click="sendToWhatsApp()" class="bg-green-600 text-white px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 shadow-md hover:bg-green-700 active:scale-95 transition">
+                <i class="fa-brands fa-whatsapp text-base"></i> إرسال الطلب للواتساب
+            </button>
+        </div>
+    </div>
+
+    <!-- نافذة كرت الولاء -->
+    <div x-show="showLoyalty" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" x-transition>
+        <div class="bg-white w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-xl">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-base text-gray-800"><i class="fa-solid fa-stamp text-amber-900"></i> كرت الولاء الرقمي</h3>
+                <button @click="showLoyalty = false" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-xs text-gray-500">اجمع 6 ختمات وخذ المشروب السابع مجاناً! أعطِ جوالك للكاشير عند كل عملية شراء لتسجيل الختمة برمز سري.</p>
+            
+            <!-- شبكة الختمات -->
+            <div class="grid grid-cols-3 gap-3 py-2">
+                <template x-for="i in 6">
+                    <div class="h-16 rounded-2xl border-2 flex flex-col items-center justify-center text-xs font-bold"
+                         :class="i <= stamps ? 'border-amber-900 bg-amber-50 text-amber-900' : 'border-dashed border-gray-300 text-gray-300'">
+                        <i class="fa-solid" :class="i <= stamps ? 'fa-check text-base' : 'fa-mug-hot'"></i>
+                        <span class="text-[10px] mt-1" x-text="'ختمة ' + i"></span>
+                    </div>
+                </template>
+            </div>
+
+            <!-- زر الكاشير لتسجيل الختمة -->
+            <div class="pt-2 border-t border-gray-100 flex gap-2">
+                <input type="password" x-model="cashierPin" placeholder="رمز الكاشير السري" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 text-xs text-center">
+                <button @click="addStamp()" class="bg-amber-900 text-white px-4 py-2 rounded-xl text-xs font-bold">تسجيل ختمة</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة نظام المزاج البسيط -->
+    <div x-show="showMood" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" x-transition>
+        <div class="bg-white w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-xl">
+            <h3 class="font-bold text-base text-gray-800">✨ مختبر المزاج السريع</h3>
+            <p class="text-xs text-gray-500">اختر حالتك الآن لنقترح عليك المشروب المناسب:</p>
+            
+            <div class="space-y-2">
+                <button @click="selectMood('إبداء يوم قوي ونشيط 🔥', menu[0])" class="w-full text-right p-3 rounded-xl bg-gray-50 hover:bg-amber-50 text-xs font-bold border border-gray-100 transition">🔥 رايق ونشيط (نحتاج قهوة ثقيلة)</button>
+                <button @click="selectMood('رايق وفوق السحاب 😌', menu[1])" class="w-full text-right p-3 rounded-xl bg-gray-50 hover:bg-amber-50 text-xs font-bold border border-gray-100 transition">😌 رايق وفوق السحاب (مشروب بارد ومنعش)</button>
+                <button @click="selectMood('أحتاج حلا يروق الراس 🍰', menu[2])" class="w-full text-right p-3 rounded-xl bg-gray-50 hover:bg-amber-50 text-xs font-bold border border-gray-100 transition">🍰 تعبان وأحتاج حاجة حالية</button>
+            </div>
+
+            <button @click="showMood = false" class="w-full bg-gray-200 text-gray-700 py-2 rounded-xl text-xs font-bold">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- سكريبت البرمجة والمنطق (Alpine.js) -->
+    <script>
+        function cafeApp() {
+            return {
+                showLoyalty: false,
+                showMood: false,
+                stamps: parseInt(localStorage.getItem('cafe_stamps') || '0'),
+                cashierPin: '',
+                cart: [],
+                menu: [
+                    { id: 1, name: 'إسبريسو / دبل', desc: 'قهوة مركزة تعدل المزاج', price: 1500 },
+                    { id: 2, name: 'لاتيه بارد (آيس لاتيه)', desc: 'حليب منعش مع إسبريسو وثلج', price: 3000 },
+                    { id: 3, name: 'تشيز كيك فاخر', desc: 'قطعة حلا طازجة لذيذة', price: 2500 },
+                    { id: 4, name: 'شاي مغربي أصلي', desc: 'بالنعناع الطازج', price: 1000 }
+                ],
+                addToCart(item) {
+                    let existing = this.cart.find(i => i.id === item.id);
+                    if (existing) {
+                        existing.qty++;
+                    } else {
+                        this.cart.push({ ...item, qty: 1 });
+                    }
+                },
+                cartTotal() {
+                    return this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                },
+                sendToWhatsApp() {
+                    let phone = "967700000000"; // استبدله برقم الكافي الحقيقي
+                    let text = " *طلب جديد من المنيو الرقمي*%0A------------------%0A";
+                    this.cart.forEach(item => {
+                        text += `▫️ ${item.name} (x${item.qty}) - ${item.price * item.qty} ريال%0A`;
+                    });
+                    text += `------------------%0A*المجموع الكلي: ${this.cartTotal()} ريال*`;
+                    
+                    window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+                },
+                openMoodModal() {
+                    this.showMood = true;
+                },
+                selectMood(moodText, recommendedItem) {
+                    alert(`بما أنك: "${moodText}"\nننصحك بطلب: ${recommendedItem.name} (${recommendedItem.price} ريال) ☕`);
+                    this.showMood = false;
+                    this.addToCart(recommendedItem);
+                },
+                addStamp() {
+                    // رمز الكاشير السري الافتراضي هنا: 1234 (يمكنك تغييره)
+                    if (this.cashierPin === '1234') {
+                        if (this.stamps < 6) {
+                            this.stamps++;
+                        } else {
+                            this.stamps = 0;
+                            alert('مبروك! العميل أكمل 6 ختمات واستحق المشروب السابع المجاني 🎉');
+                        }
+                        localStorage.setItem('cafe_stamps', this.stamps);
+                        this.cashierPin = '';
+                        alert('تم تسجيل الختمة بنجاح!');
+                    } else {
+                        alert('رمز الكاشير غير صحيح!');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -4,10 +4,13 @@ class CafeApp {
         this.cart = [];
         this.menu = [
             { id: 1, name: 'إسبريسو مكياتو فاخر', desc: 'قهوة مركزة برغوة حليب ناعمة', price: 1500 },
-            { id: 2, name: 'آيس برود لاتيه', desc: 'مشروب البارود المنعش الخاص بالكافي', price: 3000 },
+            { id: 2, name: 'آيس الجود لاتيه', desc: 'مشروب الكافي البارد والمميز الخاص بنا', price: 3000 },
             { id: 3, name: 'تشيز كيك التوت البلدي', desc: 'طازج ولذيذ يعدل المزاج تماماً', price: 2500 },
-            { id: 4, name: 'شاي كرك عدني أصلي', desc: 'بالبهارات الخاصة والهيل الهندي', price: 1000 }
+            { id: 4, name: 'شاي كرك عدني أصلي', desc: 'بالبهارات الخاصة والهيل الهندي', price: 1000 },
+            { id: 5, name: 'كيكة الشوكولاتة البلجيكية', desc: 'غنية بالصوص الدافئ المقرمش', price: 3500 },
+            { id: 6, name: 'موهيتو نكهات منعش', desc: 'بالنعناع الطازج والليمون الصافي', price: 2000 }
         ];
+        this.deferredPrompt = null;
         this.init();
     }
 
@@ -15,18 +18,40 @@ class CafeApp {
         this.renderMenu();
         this.updateLoyaltyUI();
         this.setTodayQRBadge();
+        this.setupPWAInstaller();
+    }
+
+    setupPWAInstaller() {
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            this.deferredPrompt = e;
+            const btn = document.getElementById('installPwaBtn');
+            if(btn) btn.classList.remove('hidden');
+        });
+    }
+
+    async installPwa() {
+        if (this.deferredPrompt) {
+            this.deferredPrompt.prompt();
+            const { outcome } = await this.deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                document.getElementById('installPwaBtn').classList.add('hidden');
+            }
+            this.deferredPrompt = null;
+        }
     }
 
     renderMenu() {
         const container = document.getElementById('menuList');
+        if(!container) return;
         container.innerHTML = this.menu.map(item => `
             <div class="bg-[#171513] border border-white/5 p-4 rounded-3xl flex justify-between items-center transition-all duration-300 hover:border-amber-500/30 hover:bg-[#1c1916] group">
                 <div class="flex-1 pl-3">
-                    <h4 class="font-bold text-xs text-white group-hover:text-amber-400 transition-colors">${item.name}</h4>
+                    <h4 class="font-bold text-xs md:text-sm text-white group-hover:text-amber-400 transition-colors">${item.name}</h4>
                     <p class="text-[11px] text-slate-400 mb-2">${item.desc}</p>
                     <span class="text-amber-400 font-black text-xs">${item.price} ريال</span>
                 </div>
-                <button onclick="app.addToCart(${item.id})" class="bg-amber-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-900/40 active:scale-90 transition-all duration-300 hover:bg-amber-500">
+                <button onclick="app.addToCart(${item.id})" class="bg-amber-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-950/40 active:scale-90 transition-all hover:bg-amber-500">
                     <i class="fa-solid fa-plus text-xs"></i>
                 </button>
             </div>
@@ -44,22 +69,83 @@ class CafeApp {
         this.updateCartUI();
     }
 
+    // تعديل وزيادة أو نقصان الكمية من السلة مباشرة
+    changeQty(id, delta) {
+        let item = this.cart.find(i => i.id === id);
+        if (item) {
+            item.qty += delta;
+            if (item.qty <= 0) {
+                this.removeFromCart(id);
+            } else {
+                this.updateCartUI();
+            }
+        }
+    }
+
+    removeFromCart(id) {
+        this.cart = this.cart.filter(i => i.id !== id);
+        this.updateCartUI();
+    }
+
     updateCartUI() {
         const cartBar = document.getElementById('cartBar');
         const totalSum = document.getElementById('cartTotalSum');
+        const cartCountBadge = document.getElementById('cartCountBadge');
+        
         const total = this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        const totalCount = this.cart.reduce((sum, item) => sum + item.qty, 0);
 
-        totalSum.textContent = total;
+        if(totalSum) totalSum.textContent = total;
+        if(cartCountBadge) cartCountBadge.textContent = totalCount;
+
+        // تحديث محتوى نافذة السلة لو كانت مفتوحة
+        this.renderCartModalItems();
+
         if (this.cart.length > 0) {
             cartBar.classList.remove('hidden');
         } else {
             cartBar.classList.add('hidden');
+            this.toggleCartModal(false);
+        }
+    }
+
+    renderCartModalItems() {
+        const container = document.getElementById('cartItemsList');
+        const modalTotal = document.getElementById('cartModalTotal');
+        if(!container) return;
+
+        const total = this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        if(modalTotal) modalTotal.textContent = total;
+
+        container.innerHTML = this.cart.map(item => `
+            <div class="bg-black/30 border border-white/5 p-3 rounded-2xl flex justify-between items-center">
+                <div class="flex-1">
+                    <h5 class="font-bold text-xs text-white">${item.name}</h5>
+                    <span class="text-[10px] text-amber-400">${item.price * item.qty} ريال</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="app.changeQty(${item.id}, -1)" class="w-7 h-7 rounded-xl bg-white/5 hover:bg-white/10 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-minus"></i></button>
+                    <span class="text-xs font-bold text-white w-5 text-center">${item.qty}</span>
+                    <button onclick="app.changeQty(${item.id}, 1)" class="w-7 h-7 rounded-xl bg-white/5 hover:bg-white/10 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-plus"></i></button>
+                    <button onclick="app.removeFromCart(${item.id})" class="w-7 h-7 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 flex items-center justify-center text-xs ml-1"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    toggleCartModal(show) {
+        const modal = document.getElementById('cartModal');
+        if(show) {
+            this.renderCartModalItems();
+            modal.classList.remove('hidden');
+        } else {
+            modal.classList.add('hidden');
         }
     }
 
     sendToWhatsApp() {
-        const phone = "967776425406";
-        let text = "✨ *طلب جديد من كافيه الجُود*%0A------------------%0A";
+        const phone = "967700000000"; // استبدله برقم خدمة العملاء الحقيقي
+        let text = "✨ *طلب جديد من الجود كافيه*%0A------------------%0A";
         this.cart.forEach(item => {
             text += `▪️ ${item.name} (x${item.qty}) - ${item.price * item.qty} ريال%0A`;
         });
@@ -80,6 +166,7 @@ class CafeApp {
 
     renderStampsGrid() {
         const grid = document.getElementById('stampsGrid');
+        if(!grid) return;
         let html = '';
         const logoSrc = "logo.png";
 
@@ -88,7 +175,7 @@ class CafeApp {
             if (isStamped) {
                 html += `
                     <div class="h-20 rounded-2xl border-2 border-amber-500 bg-amber-950/40 flex flex-col items-center justify-center relative overflow-hidden shadow-lg animate-in">
-                        <img src="${logoSrc}" class="w-9 h-9 rounded-full object-cover border border-amber-400/50">
+                        <img src="${logoSrc}" class="w-9 h-9 rounded-full object-cover border border-amber-400/50" onerror="this.src='https://via.placeholder.com/150'">
                         <span class="text-[9px] font-bold text-amber-300 mt-1">ختمة ${i}</span>
                         <div class="absolute top-1 right-1 bg-amber-500 text-black rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold"><i class="fa-solid fa-check"></i></div>
                     </div>
@@ -103,12 +190,18 @@ class CafeApp {
             }
         }
         grid.innerHTML = html;
-        document.getElementById('stampsCount').textContent = this.stamps;
+        this.updateLoyaltyUI();
+    }
+
+    updateLoyaltyUI() {
+        const stampsCountEl = document.getElementById('stampsCount');
+        if(stampsCountEl) stampsCountEl.textContent = this.stamps;
     }
 
     setTodayQRBadge() {
         const today = new Date().toISOString().slice(0, 10);
-        document.getElementById('qrDateBadge').textContent = today;
+        const badge = document.getElementById('qrDateBadge');
+        if(badge) badge.textContent = today;
     }
 
     verifyAndAddStamp() {
@@ -121,7 +214,7 @@ class CafeApp {
                 document.getElementById('cashierPinInput').value = '';
                 
                 if (this.stamps === 6) {
-                    this.showAlert('مبروك الفوز! 🎉', 'أكملت 6 ختمات بنجاح واستحقيت مشروبك السابع المجاني.', 'success');
+                    this.showAlert('مبروك الفوز! 🎉', 'أكملت 6 ختمات بنجاح واستحقيت مشروبك السابع المجاني من الجود كافيه.', 'success');
                 } else {
                     this.showAlert('تمت إضافة الختمة ✅', `تم تسجيل الختمة رقم (${this.stamps}) بنجاح.`, 'success');
                 }
@@ -143,6 +236,7 @@ class CafeApp {
 
     openMoodModal() {
         const list = document.getElementById('moodOptionsList');
+        if(!list) return;
         const moods = [
             { text: '🔥 رايق ونشيط (أحتاج قهوة ثقيلة تقفل المزاج)', itemIndex: 0 },
             { text: '😌 منعش وفوق السحاب (مشروب بارد يروق الدم)', itemIndex: 1 },

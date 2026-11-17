@@ -4,6 +4,16 @@ body {
     font-family: 'Cairo', sans-serif;
 }
 
+/* تنسيق احترافي للشاشات الكبيرة (الكمبيوتر) بحيث تعرض بتصميم مرن ومرتب */
+@media (min-width: 1024px) {
+    body {
+        background-color: #0b0a09 !important;
+    }
+    main, header > div {
+        max-width: 750px !important;
+    }
+}
+
 @keyframes scaleUp {
     from { transform: scale(0.92); opacity: 0; }
     to { transform: scale(1); opacity: 1; }

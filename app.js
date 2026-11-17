@@ -4,14 +4,14 @@ class CafeApp {
         this.cart = [];
         this.currentCategory = 'all';
         this.menu = [
-            { id: 1, name: 'إسبريسو مكياتو فاخر', desc: 'قهوة مركزة برغوة حليب ناعمة', price: 1500, category: 'hot' },
-            { id: 2, name: 'شاي كرك عدني أصلي', desc: 'بالبهارات الخاصة والهيل الهندي', price: 1000, category: 'hot' },
-            { id: 3, name: 'قهوة تركي على الصاج', desc: 'مضبوطة على الوجه بطعم أصيل', price: 1200, category: 'hot' },
-            { id: 4, name: 'آيس الجود لاتيه', desc: 'مشروب الكافي البارد والمميز الخاص بنا', price: 3000, category: 'cold' },
-            { id: 5, name: 'موهيتو نكهات منعش', desc: 'بالنعناع الطازج والليمون الصافي', price: 2000, category: 'cold' },
-            { id: 6, name: 'آيس سبانيش لاتيه', desc: 'حليب بارد مع الإسبريسو والحليب المكثف', price: 3200, category: 'cold' },
-            { id: 7, name: 'تشيز كيك التوت البلدي', desc: 'طازج ولذيذ يعدل المزاج تماماً', price: 2500, category: 'dessert' },
-            { id: 8, name: 'كيكة الشوكولاتة البلجيكية', desc: 'غنية بالصوص الدافئ المقرمش', price: 3500, category: 'dessert' }
+            { id: 1, name: 'إسبريسو مكياتو فاخر', desc: 'قهوة مركزة تعدل المزاج برغوة ناعمة تروق الراس', price: 1500, category: 'hot' },
+            { id: 2, name: 'شاي كرك عدني أصلي', desc: 'على اصولد بالهيل والبهارات اللي تضبط الدماغ', price: 1000, category: 'hot' },
+            { id: 3, name: 'قهوة تركي مضبوطة', desc: 'وجهها مضبوط وطعمها يرجع لك روقانك', price: 1200, category: 'hot' },
+            { id: 4, name: 'آيس الجود لاتيه', desc: 'مشروبنا البارد المخصوص اللي يبرد على القلب', price: 3000, category: 'cold' },
+            { id: 5, name: 'موهيتو نكهات منعش', desc: 'نعناع وليمون طازج يصحصحك من الآخر', price: 2000, category: 'cold' },
+            { id: 6, name: 'آيس سبانيش لاتيه', desc: 'حليب بارد مع إسبريسو ولمسة حلا لذيذة', price: 3200, category: 'cold' },
+            { id: 7, name: 'تشيز كيك التوت البلدي', desc: 'طازج وبارد يذوب بالفم ذوبان', price: 2500, category: 'dessert' },
+            { id: 8, name: 'كيكة الشوكولاتة البلجيكية', desc: 'غرقانة صوص دافئ ومقرمشة تفتح النفس', price: 3500, category: 'dessert' }
         ];
         this.deferredPrompt = null;
         this.init();
@@ -29,8 +29,8 @@ class CafeApp {
     registerServiceWorker() {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
-                .then(() => console.log('Service Worker Registered'))
-                .catch(err => console.log('SW registration failed: ', err));
+                .then(() => console.log('SW Active'))
+                .catch(err => console.log('SW Error: ', err));
         }
     }
 
@@ -103,7 +103,7 @@ class CafeApp {
             : this.menu.filter(i => i.category === this.currentCategory);
 
         container.innerHTML = filtered.map(item => `
-            <div class="bg-white dark:bg-[#171513] border border-slate-200 dark:border-white/5 p-4 rounded-3xl flex justify-between items-center transition-all duration-300 hover:border-amber-500/30 hover:bg-slate-50 dark:hover:bg-[#1c1916] shadow-sm group">
+            <div class="bg-white dark:bg-[#171513] border border-slate-200 dark:border-white/5 p-4 rounded-3xl flex justify-between items-center transition-all duration-300 hover:border-amber-500/35 hover:bg-slate-50 dark:hover:bg-[#1c1916] shadow-sm group">
                 <div class="flex-1 pl-3">
                     <h4 class="font-bold text-xs md:text-sm text-slate-800 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">${item.name}</h4>
                     <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2">${item.desc}</p>
@@ -200,8 +200,8 @@ class CafeApp {
     }
 
     sendToWhatsApp() {
-        const phone = "967700000000";
-        let text = "✨ *طلب جديد من الجود كافيه*%0A------------------%0A";
+        const phone = "96776425406";
+        let text = "✨ *يا هلا، عندي طلب جديد من الجود كافيه*%0A------------------%0A";
         this.cart.forEach(item => {
             text += `▪️ ${item.name} (x${item.qty}) - ${item.price * item.qty} ريال%0A`;
         });
@@ -270,15 +270,15 @@ class CafeApp {
                 document.getElementById('cashierPinInput').value = '';
                 
                 if (this.stamps === 6) {
-                    this.showAlert('مبروك الفوز! 🎉', 'أكملت 6 أختام بنجاح واستحقيت مشروبك السابع المجاني من الجود كافيه.', 'success');
+                    this.showAlert('كفو والله! الف مبروك 🎉', 'أكملت 6 أختام واستحقت مشروبك السابع المجاني منا عساه بالعافية.', 'success');
                 } else {
-                    this.showAlert('تمت إضافة الختم ✅', `تم تسجيل الختم رقم (${this.stamps}) بنجاح.`, 'success');
+                    this.showAlert('تم الختم يالغالي ✅', `حطينا لك الختم رقم (${this.stamps})، باقي شوي وتوصل للجائزة!`, 'success');
                 }
             } else {
-                this.showAlert('تنبيه', 'أكملت جميع الأختام مسبقاً!', 'info');
+                this.showAlert('يا طويل العمر', 'أنت مقفل الاختام كلها ومستحق جائزتك مسبقاً!', 'info');
             }
         } else {
-            this.showAlert('خطأ ❌', 'رمز الكاشير غير صحيح.', 'error');
+            this.showAlert('خطأ بالرمز ❌', 'رمز الكاشير غير صحيح، تأكد منه زين.', 'error');
         }
     }
 
@@ -294,9 +294,9 @@ class CafeApp {
         const list = document.getElementById('moodOptionsList');
         if(!list) return;
         const moods = [
-            { text: '🔥 رايق ونشيط (أحتاج قهوة ثقيلة تقفل المزاج)', itemIndex: 0 },
-            { text: '😌 منعش وفوق السحاب (مشروب بارد يروق الدم)', itemIndex: 3 },
-            { text: '🍰 تعبان وأحتاج حلا يعدل اليوم', itemIndex: 6 }
+            { text: '🔥 رايق وأبي كيف ثقيل يضبط الراس', itemIndex: 0 },
+            { text: '😌 مروق وأبي شي بارد يبرد على القلب', itemIndex: 3 },
+            { text: '🍰 تعبان وأبي حلا يعدل المزاج', itemIndex: 6 }
         ];
 
         list.innerHTML = moods.map(m => `
@@ -315,7 +315,7 @@ class CafeApp {
     selectMood(index) {
         const recommended = this.menu.find(i => i.id === index + 1) || this.menu[0];
         this.closeMoodModal();
-        this.showAlert('اختيار الذكاء الاصطناعي ☕', `بناءً على مزاجك، نرشح لك: (${recommended.name}) بسعر ${recommended.price} ريال. تم إضافته لسلتك!`, 'success');
+        this.showAlert('اختيار الذكاء الاصطناعي ☕', `على خشمي، نرشح لك: (${recommended.name}) بسعر ${recommended.price} ريال، وضفناه لك بالسلة.`, 'success');
         this.addToCart(recommended.id);
     }
 

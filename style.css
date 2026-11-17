@@ -2,8 +2,6 @@
 
 body {
     font-family: 'Cairo', sans-serif;
-    background-color: #0f0e0d;
-    color: #f8fafc;
 }
 
 @keyframes scaleUp {
@@ -17,8 +15,15 @@ body {
 
 ::-webkit-scrollbar {
     width: 4px;
+    height: 4px;
 }
 ::-webkit-scrollbar-thumb {
-    background: #332f2b;
+    background: #cbd5e1;
     border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb {
+    background: #332f2b;
+}
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
 }

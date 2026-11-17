@@ -15,7 +15,6 @@ body {
     animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* تخصيص التمرير */
 ::-webkit-scrollbar {
     width: 4px;
 }

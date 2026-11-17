@@ -200,7 +200,7 @@ class CafeApp {
     }
 
     sendToWhatsApp() {
-        const phone = "96776425406";
+        const phone = "967776425406";
         let text = "✨ *يا هلا، عندي طلب جديد من الجود كافيه*%0A------------------%0A";
         this.cart.forEach(item => {
             text += `▪️ ${item.name} (x${item.qty}) - ${item.price * item.qty} ريال%0A`;

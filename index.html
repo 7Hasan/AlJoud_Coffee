@@ -3,65 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كافيه البرود | تجربة استثنائية</title>
+    <title>الجود كافيه | تجربة استثنائية</title>
+    <!-- ربط PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121110">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
-        body { font-family: 'Cairo', sans-serif; background-color: #0f0e0d; color: #f8fafc; }
-        @keyframes scaleUp {
-            from { transform: scale(0.92); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        .animate-in { animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #332f2b; border-radius: 4px; }
-    </style>
+    <!-- ربط ملف الـ CSS الخارجي -->
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-[#0f0e0d] text-slate-100 pb-32">
+<body class="bg-[#0f0e0d] text-slate-100 pb-36 selection:bg-amber-500 selection:text-black">
 
-    <!-- الهيدر الفاخر مع الشعار -->
-    <header class="sticky top-0 z-40 border-b border-white/10 backdrop-blur-xl bg-[#0f0e0d]/80">
-        <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
+    <!-- الهيدر الفاخر -->
+    <header class="sticky top-0 z-40 border-b border-white/10 backdrop-blur-xl bg-[#0f0e0d]/85">
+        <div class="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="relative">
                     <div class="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-amber-700 rounded-full blur opacity-70 animate-pulse"></div>
-                    <!-- مسار الشعار -->
-                    <img src="logo.png" alt="شعار كافيه البرود" class="relative w-11 h-11 rounded-full object-cover border-2 border-amber-500/50 shadow-lg" onerror="this.src='https://via.placeholder.com/150'">
+                    <img src="logo.png" alt="شعار الجود كافيه" class="relative w-12 h-12 rounded-full object-cover border-2 border-amber-500/50 shadow-lg" onerror="this.src='https://via.placeholder.com/150'">
                 </div>
                 <div>
-                    <h1 class="font-black text-sm tracking-wide text-amber-500">كافيه البَـرود</h1>
-                    <p class="text-[10px] text-slate-400 tracking-wider">الروقـان عـلى أصولـه</p>
+                    <h1 class="font-black text-sm md:text-base tracking-wide text-amber-500">الجود كافيه</h1>
+                    <p class="text-[10px] text-slate-400 tracking-wider">ألذ قهوة مختصة، بروقان تام</p>
                 </div>
             </div>
             
-            <button onclick="app.toggleLoyalty(true)" class="bg-gradient-to-r from-amber-600 to-amber-800 text-white px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-amber-900/40 active:scale-95 transition-all duration-300 border border-amber-400/20">
-                <i class="fa-solid fa-award text-amber-200"></i> كرت الولاء (<span id="stampsCount">0</span>/6)
-            </button>
+            <div class="flex items-center gap-2">
+                <!-- زر تثبيت التطبيق PWA -->
+                <button id="installPwaBtn" onclick="app.installPwa()" class="hidden bg-white/5 border border-white/10 text-amber-400 px-3 py-2 rounded-2xl text-xs font-bold items-center gap-1.5 hover:bg-white/10 transition">
+                    <i class="fa-solid fa-download"></i> تثبيت التطبيق
+                </button>
+                <button onclick="app.toggleLoyalty(true)" class="bg-gradient-to-r from-amber-600 to-amber-800 text-white px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-amber-950/40 active:scale-95 transition-all border border-amber-400/20">
+                    <i class="fa-solid fa-award text-amber-200"></i> كرت الولاء (<span id="stampsCount">0</span>/6)
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- المحتوى الرئيسي -->
-    <main class="max-w-md mx-auto p-4 space-y-5">
+    <!-- المحتوى الرئيسي (متوافق تماماً مع الجوال واللاب توب) -->
+    <main class="max-w-2xl mx-auto p-4 space-y-6">
         
-        <!-- قسم النبذة والـ Slogan الفخم -->
-        <section class="relative bg-gradient-to-br from-amber-950/60 via-[#161412] to-[#121110] p-5 rounded-[2.5rem] border border-amber-500/20 shadow-2xl overflow-hidden text-center space-y-2">
+        <!-- قسم البانر والنبذة الفخمة -->
+        <section class="relative bg-gradient-to-br from-amber-950/50 via-[#161412] to-[#121110] p-6 md:p-8 rounded-[2.5rem] border border-amber-500/20 shadow-2xl overflow-hidden text-center space-y-3">
             <div class="absolute -right-10 -top-10 w-32 h-32 bg-amber-600/10 rounded-full blur-3xl"></div>
-            <span class="inline-block bg-amber-500/10 text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full border border-amber-500/20 tracking-widest uppercase">مرحباً بكم في عالم البرود</span>
-            <h2 class="font-black text-lg text-white leading-tight">حيث تلتئم تفاصيل المزاج الهادئ ☕</h2>
-            <p class="text-xs text-slate-400 leading-relaxed px-2">نقدم لك أجود أنواع القهوة المختصة والحلويات الطازجة مصممة خصيصاً لتناسب ذائقتك الفاخرة.</p>
+            <span class="inline-block bg-amber-500/10 text-amber-400 text-[10px] font-bold px-3.5 py-1.5 rounded-full border border-amber-500/20 tracking-widest uppercase">مرحباً بكم في الجود كافيه</span>
+            <h2 class="font-black text-xl md:text-2xl text-white leading-tight">حيث تلتئم تفاصيل المزاج الهادئ ☕</h2>
+            <p class="text-xs md:text-sm text-slate-400 leading-relaxed max-w-lg mx-auto">نقدم لك أجود أنواع القهوة المختصة والحلويات الطازجة المصنوعة بكل حب لتناسب ذائقتك الرفيعة.</p>
         </section>
 
+        <!-- خدمات إضافية لإثراء الصفحة (أوقات العمل والمميزات) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="bg-[#171513] border border-white/5 p-4 rounded-3xl text-center space-y-1">
+                <i class="fa-solid fa-clock text-amber-500 text-base mb-1"></i>
+                <h4 class="font-bold text-xs text-white">أوقات العمل</h4>
+                <p class="text-[11px] text-slate-400">يومياً من 6 صباحاً إلى 12 منتصف الليل</p>
+            </div>
+            <div class="bg-[#171513] border border-white/5 p-4 rounded-3xl text-center space-y-1">
+                <i class="fa-solid fa-wifi text-amber-500 text-base mb-1"></i>
+                <h4 class="font-bold text-xs text-white">خدمة سريعة & Wi-Fi</h4>
+                <p class="text-[11px] text-slate-400">جلسات هادئة وإنترنت فائق السرعة</p>
+            </div>
+            <div class="bg-[#171513] border border-white/5 p-4 rounded-3xl text-center space-y-1">
+                <i class="fa-solid fa-truck text-amber-500 text-base mb-1"></i>
+                <h4 class="font-bold text-xs text-white">توصيل سريع</h4>
+                <p class="text-[11px] text-slate-400">اطلب عبر الواتساب ويصلك طلبك طازج</p>
+            </div>
+        </div>
+
         <!-- مختبر المزاج الذكي -->
-        <div class="relative bg-gradient-to-r from-amber-900 to-amber-950 text-white p-4 rounded-3xl shadow-xl overflow-hidden border border-amber-700/30">
-            <div class="relative z-10 flex justify-between items-center">
-                <div class="space-y-1">
-                    <h3 class="font-bold text-xs flex items-center gap-1.5 text-amber-300">
+        <div class="relative bg-gradient-to-r from-amber-900 to-amber-950 text-white p-5 rounded-3xl shadow-xl overflow-hidden border border-amber-700/30">
+            <div class="relative z-10 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="space-y-1 text-center sm:text-right">
+                    <h3 class="font-bold text-sm flex items-center justify-center sm:justify-start gap-2 text-amber-300">
                         <i class="fa-solid fa-wand-magic-sparkles"></i> وش مزاجك اليوم؟
                     </h3>
-                    <p class="text-[11px] text-amber-100/70">دعنا نختار المشروب الأنسب لحالتك الآن</p>
+                    <p class="text-xs text-amber-100/80">دعنا نختار المشروب الأنسب لحالتك النفسية الآن</p>
                 </div>
-                <button onclick="app.openMoodModal()" class="bg-white text-amber-950 text-xs font-black px-4 py-2.5 rounded-2xl shadow-lg active:scale-95 transition-all duration-300 hover:bg-amber-100">
+                <button onclick="app.openMoodModal()" class="w-full sm:w-auto bg-white text-amber-950 text-xs font-black px-5 py-3 rounded-2xl shadow-lg active:scale-95 transition-all hover:bg-amber-100">
                     اختار لي ✨
                 </button>
             </div>
@@ -70,54 +89,90 @@
         <!-- قائمة المنيو -->
         <div class="space-y-3">
             <div class="flex justify-between items-center px-1">
-                <h3 class="font-bold text-slate-300 text-xs tracking-wide">قائمة المشروبات والحلويات</h3>
-                <span class="text-[10px] text-amber-500 font-bold">طازج يومياً</span>
+                <h3 class="font-bold text-slate-300 text-sm tracking-wide">قائمة المشروبات والحلويات</h3>
+                <span class="text-[11px] text-amber-500 font-bold">طازج يومياً</span>
             </div>
-            <div id="menuList" class="space-y-3">
+            <!-- شبكة تعرض المنيو بشكل ممتاز على اللاب توب (عنصرين بجانب بعض) والجوال (عنصر واحد) -->
+            <div id="menuList" class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <!-- يتم تعبئتها ديناميكياً -->
             </div>
         </div>
 
-        <!-- قسم التواصل الاجتماعي وأزرار الاتصال -->
-        <section class="bg-[#171513] border border-white/5 p-5 rounded-[2.5rem] space-y-4 shadow-xl">
-            <h3 class="text-center font-bold text-xs text-slate-300 tracking-wider">تواصل معنا & تابع حساباتنا</h3>
+        <!-- قسم التواصل الاجتماعي وحسابات الكافيه -->
+        <section class="bg-[#171513] border border-white/5 p-5 md:p-6 rounded-[2.5rem] space-y-4 shadow-xl">
+            <h3 class="text-center font-bold text-xs text-slate-300 tracking-wider uppercase">تابع حسابات الجود كافيه وتواصل معنا</h3>
             
             <div class="grid grid-cols-3 gap-2">
-                <a href="https://instagram.com" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-[#201d1a] border border-white/5 hover:border-amber-500/40 text-slate-300 hover:text-amber-400 transition-all duration-300 group">
-                    <i class="fa-brands fa-instagram text-lg group-hover:scale-125 transition-transform"></i>
-                    <span class="text-[10px] mt-1 font-semibold">انستقرام</span>
+                <a href="https://instagram.com" target="_blank" class="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-[#201d1a] border border-white/5 hover:border-amber-500/40 text-slate-300 hover:text-amber-400 transition-all group">
+                    <i class="fa-brands fa-instagram text-xl group-hover:scale-125 transition-transform"></i>
+                    <span class="text-[11px] mt-1 font-semibold">انستقرام</span>
                 </a>
-                <a href="https://tiktok.com" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-[#201d1a] border border-white/5 hover:border-amber-500/40 text-slate-300 hover:text-amber-400 transition-all duration-300 group">
-                    <i class="fa-brands fa-tiktok text-lg group-hover:scale-125 transition-transform"></i>
-                    <span class="text-[10px] mt-1 font-semibold">تيك توك</span>
+                <a href="https://tiktok.com" target="_blank" class="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-[#201d1a] border border-white/5 hover:border-amber-500/40 text-slate-300 hover:text-amber-400 transition-all group">
+                    <i class="fa-brands fa-tiktok text-xl group-hover:scale-125 transition-transform"></i>
+                    <span class="text-[11px] mt-1 font-semibold">تيك توك</span>
                 </a>
-                <a href="https://maps.google.com" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-[#201d1a] border border-white/5 hover:border-amber-500/40 text-slate-300 hover:text-amber-400 transition-all duration-300 group">
-                    <i class="fa-solid fa-location-dot text-lg group-hover:scale-125 transition-transform"></i>
-                    <span class="text-[10px] mt-1 font-semibold">موقعنا</span>
+                <a href="https://maps.google.com" target="_blank" class="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-[#201d1a] border border-white/5 hover:border-amber-500/40 text-slate-300 hover:text-amber-400 transition-all group">
+                    <i class="fa-solid fa-location-dot text-xl group-hover:scale-125 transition-transform"></i>
+                    <span class="text-[11px] mt-1 font-semibold">موقعنا</span>
                 </a>
             </div>
 
-            <button onclick="app.openContactModal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-700 text-white py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/30 active:scale-95 transition-all duration-300">
-                <i class="fa-solid fa-headset text-sm"></i> خدمة العملاء (اتصال، رسائل، واتساب)
+            <button onclick="app.openContactModal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-700 text-white py-3.5 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/30 active:scale-95 transition-all">
+                <i class="fa-solid fa-headset text-base"></i> خدمة العملاء (اتصال، رسائل، واتساب)
             </button>
         </section>
 
         <!-- حفظ الحقوق -->
-        <footer class="text-center pt-2 pb-4 space-y-1">
-            <p class="text-[11px] text-slate-500 font-medium">جميع الحقوق محفوظة © 2026 <span class="text-amber-500 font-bold">كافيه البرود</span></p>
-            <p class="text-[9px] text-slate-600">تصميم وتطوير برمجي متقدم احترافي</p>
+        <footer class="text-center pt-4 pb-6 space-y-1">
+            <p class="text-xs text-slate-500 font-medium">جميع الحقوق محفوظة © 2026 <span class="text-amber-500 font-bold">الجود كافيه</span></p>
+            <p class="text-[10px] text-slate-600">هندسة وتطوير البرمجيات المتقدمة</p>
         </footer>
     </main>
 
-    <!-- شريط السلة العائم -->
+    <!-- شريط السلة العائم السفلي -->
     <div id="cartBar" class="fixed bottom-0 left-0 right-0 bg-[#161412]/95 backdrop-blur-xl border-t border-white/10 p-4 shadow-2xl z-40 hidden transition-all duration-300">
-        <div class="max-w-md mx-auto flex justify-between items-center">
-            <div>
-                <span class="text-[10px] text-slate-400 block">إجمالي السلة:</span>
-                <span class="font-extrabold text-amber-400 text-base"><span id="cartTotalSum">0</span> ريال</span>
+        <div class="max-w-2xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div>
+                    <span class="text-[10px] text-slate-400 block">إجمالي السلة:</span>
+                    <span class="font-extrabold text-amber-400 text-base"><span id="cartTotalSum">0</span> ريال</span>
+                </div>
+                <!-- زر فتح تفاصيل السلة للتعديل أو الحذف -->
+                <button onclick="app.toggleCartModal(true)" class="bg-white/10 hover:bg-white/20 text-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold border border-white/10 transition">
+                    <i class="fa-solid fa-basket-shopping"></i> عرض وتعديل السلة (<span id="cartCountBadge">0</span>)
+                </button>
             </div>
-            <button onclick="app.sendToWhatsApp()" class="bg-emerald-600 text-white px-5 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/30 active:scale-95 transition-all duration-300 hover:bg-emerald-500">
-                <i class="fa-brands fa-whatsapp text-base"></i> إرسال الطلب للواتساب
+            <!-- زر إرسال الطلب (بدون كلمة واتساب) -->
+            <button onclick="app.sendToWhatsApp()" class="bg-emerald-600 text-white px-5 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/30 active:scale-95 transition hover:bg-emerald-500">
+                <i class="fa-brands fa-whatsapp text-base"></i> إرسال الطلب
+            </button>
+        </div>
+    </div>
+
+    <!-- نافذة تفاصيل وتعديل السلة (حذف أو تعديل الكميات) -->
+    <div id="cartModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#181614] border border-white/10 w-full max-w-md rounded-[2.5rem] p-6 space-y-4 shadow-2xl animate-in">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                    <i class="fa-solid fa-basket-shopping text-amber-500"></i> سلة المشتريات الخاصة بك
+                </h3>
+                <button onclick="app.toggleCartModal(false)" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-white/10 transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <p class="text-xs text-slate-400">يمكنك تعديل الكميات أو حذف المنتجات التي لا تحتاجها قبل الإرسال:</p>
+            
+            <!-- قائمة منتجات السلة -->
+            <div id="cartItemsList" class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                <!-- يتم تعبئتها ديناميكياً -->
+            </div>
+
+            <div class="pt-2 border-t border-white/10 flex justify-between items-center">
+                <span class="text-xs text-slate-400">المجموع الكلي:</span>
+                <span class="font-bold text-amber-400 text-sm"><span id="cartModalTotal">0</span> ريال</span>
+            </div>
+
+            <button onclick="app.sendToWhatsApp(); app.toggleCartModal(false);" class="w-full bg-emerald-600 text-white py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg hover:bg-emerald-500 transition">
+                <i class="fa-brands fa-whatsapp text-base"></i> إرسال الطلب لخدمة العملاء
             </button>
         </div>
     </div>
@@ -132,7 +187,7 @@
                 <button onclick="app.toggleLoyalty(false)" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:bg-white/10 transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <p class="text-xs text-slate-400 leading-relaxed">اجمع 6 ختمات بمسح QR اليومي واحصل على مشروبك السابع مجاناً!</p>
+            <p class="text-xs text-slate-400 leading-relaxed">اجمع 6 ختمات بمسح QR اليومي واحصل على مشروبك السابع مجاناً من الجود كافيه!</p>
             
             <div class="grid grid-cols-3 gap-3 py-2" id="stampsGrid"></div>
 
@@ -156,7 +211,7 @@
                 <i class="fa-solid fa-headset"></i>
             </div>
             <div>
-                <h3 class="font-bold text-sm text-white">خدمة عملاء كافيه البرود</h3>
+                <h3 class="font-bold text-sm text-white">خدمة عملاء الجود كافيه</h3>
                 <p class="text-xs text-slate-400 mt-1">اختر الطريقة المناسبة للتواصل معنا فوراً:</p>
             </div>
             
@@ -189,7 +244,7 @@
         </div>
     </div>
 
-    <!-- صندوق التنبيهات المخصص الفخم -->
+    <!-- صندوق التنبيهات المخصص -->
     <div id="customAlertModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 hidden">
         <div class="bg-[#181614] border border-white/10 w-full max-w-xs rounded-[2.5rem] p-6 text-center space-y-4 shadow-2xl animate-in">
             <div id="alertIconContainer" class="w-16 h-16 mx-auto rounded-full flex items-center justify-center text-2xl shadow-inner"></div>
@@ -201,218 +256,7 @@
         </div>
     </div>
 
-    <!-- كود الـ JavaScript مدمج لتفادي قيود المتصفح والملفات الخارجية -->
-    <script>
-        class CafeApp {
-            constructor() {
-                this.stamps = parseInt(localStorage.getItem('cafe_stamps') || '0');
-                this.cart = [];
-                this.menu = [
-                    { id: 1, name: 'إسبريسو مكياتو فاخر', desc: 'قهوة مركزة برغوة حليب ناعمة', price: 1500 },
-                    { id: 2, name: 'آيس برود لاتيه', desc: 'مشروب البارود المنعش الخاص بالكافي', price: 3000 },
-                    { id: 3, name: 'تشيز كيك التوت البلدي', desc: 'طازج ولذيذ يعدل المزاج تماماً', price: 2500 },
-                    { id: 4, name: 'شاي كرك عدني أصلي', desc: 'بالبهارات الخاصة والهيل الهندي', price: 1000 }
-                ];
-                this.init();
-            }
-
-            init() {
-                this.renderMenu();
-                this.updateLoyaltyUI();
-                this.setTodayQRBadge();
-            }
-
-            renderMenu() {
-                const container = document.getElementById('menuList');
-                if(!container) return;
-                container.innerHTML = this.menu.map(item => `
-                    <div class="bg-[#171513] border border-white/5 p-4 rounded-3xl flex justify-between items-center transition-all duration-300 hover:border-amber-500/30 hover:bg-[#1c1916] group">
-                        <div class="flex-1 pl-3">
-                            <h4 class="font-bold text-xs text-white group-hover:text-amber-400 transition-colors">${item.name}</h4>
-                            <p class="text-[11px] text-slate-400 mb-2">${item.desc}</p>
-                            <span class="text-amber-400 font-black text-xs">${item.price} ريال</span>
-                        </div>
-                        <button onclick="app.addToCart(${item.id})" class="bg-amber-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-900/40 active:scale-90 transition-all duration-300 hover:bg-amber-500">
-                            <i class="fa-solid fa-plus text-xs"></i>
-                        </button>
-                    </div>
-                `).join('');
-            }
-
-            addToCart(id) {
-                const item = this.menu.find(i => i.id === id);
-                let existing = this.cart.find(i => i.id === id);
-                if (existing) {
-                    existing.qty++;
-                } else {
-                    this.cart.push({ ...item, qty: 1 });
-                }
-                this.updateCartUI();
-            }
-
-            updateCartUI() {
-                const cartBar = document.getElementById('cartBar');
-                const totalSum = document.getElementById('cartTotalSum');
-                const total = this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-
-                if(totalSum) totalSum.textContent = total;
-                if (this.cart.length > 0) {
-                    cartBar.classList.remove('hidden');
-                } else {
-                    cartBar.classList.add('hidden');
-                }
-            }
-
-            sendToWhatsApp() {
-                const phone = "967700000000"; // ضع رقم الكافي هنا
-                let text = "✨ *طلب جديد من كافيه البرود*%0A------------------%0A";
-                this.cart.forEach(item => {
-                    text += `▪️ ${item.name} (x${item.qty}) - ${item.price * item.qty} ريال%0A`;
-                });
-                text += `------------------%0A*المجموع الكلي: ${this.cart.reduce((s, i) => s + (i.price * i.qty), 0)} ريال*`;
-                
-                window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
-            }
-
-            toggleLoyalty(show) {
-                const modal = document.getElementById('loyaltyModal');
-                if (show) {
-                    modal.classList.remove('hidden');
-                    this.renderStampsGrid();
-                } else {
-                    modal.classList.add('hidden');
-                }
-            }
-
-            renderStampsGrid() {
-                const grid = document.getElementById('stampsGrid');
-                if(!grid) return;
-                let html = '';
-                const logoSrc = "logo.png";
-
-                for (let i = 1; i <= 6; i++) {
-                    const isStamped = i <= this.stamps;
-                    if (isStamped) {
-                        html += `
-                            <div class="h-20 rounded-2xl border-2 border-amber-500 bg-amber-950/40 flex flex-col items-center justify-center relative overflow-hidden shadow-lg animate-in">
-                                <img src="${logoSrc}" class="w-9 h-9 rounded-full object-cover border border-amber-400/50" onerror="this.src='https://via.placeholder.com/150'">
-                                <span class="text-[9px] font-bold text-amber-300 mt-1">ختمة ${i}</span>
-                                <div class="absolute top-1 right-1 bg-amber-500 text-black rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold"><i class="fa-solid fa-check"></i></div>
-                            </div>
-                        `;
-                    } else {
-                        html += `
-                            <div class="h-20 rounded-2xl border-2 border-dashed border-white/10 bg-black/20 flex flex-col items-center justify-center text-slate-600">
-                                <i class="fa-solid fa-mug-hot text-base opacity-30"></i>
-                                <span class="text-[9px] mt-1 text-slate-500">ختمة ${i}</span>
-                            </div>
-                        `;
-                    }
-                }
-                grid.innerHTML = html;
-                const stampsCountEl = document.getElementById('stampsCount');
-                if(stampsCountEl) stampsCountEl.textContent = this.stamps;
-            }
-
-            updateLoyaltyUI() {
-                const stampsCountEl = document.getElementById('stampsCount');
-                if(stampsCountEl) stampsCountEl.textContent = this.stamps;
-            }
-
-            setTodayQRBadge() {
-                const today = new Date().toISOString().slice(0, 10);
-                const badge = document.getElementById('qrDateBadge');
-                if(badge) badge.textContent = today;
-            }
-
-            verifyAndAddStamp() {
-                const pinInput = document.getElementById('cashierPinInput').value;
-                if (pinInput === '7788') {
-                    if (this.stamps < 6) {
-                        this.stamps++;
-                        localStorage.setItem('cafe_stamps', this.stamps);
-                        this.renderStampsGrid();
-                        document.getElementById('cashierPinInput').value = '';
-                        
-                        if (this.stamps === 6) {
-                            this.showAlert('مبروك الفوز! 🎉', 'أكملت 6 ختمات بنجاح واستحقيت مشروبك السابع المجاني.', 'success');
-                        } else {
-                            this.showAlert('تمت إضافة الختمة ✅', `تم تسجيل الختمة رقم (${this.stamps}) بنجاح.`, 'success');
-                        }
-                    } else {
-                        this.showAlert('تنبيه', 'أكملت جميع الختمات مسبقاً!', 'info');
-                    }
-                } else {
-                    this.showAlert('خطأ ❌', 'رمز الكاشير غير صحيح.', 'error');
-                }
-            }
-
-            openContactModal() {
-                document.getElementById('contactModal').classList.remove('hidden');
-            }
-
-            closeContactModal() {
-                document.getElementById('contactModal').classList.add('hidden');
-            }
-
-            openMoodModal() {
-                const list = document.getElementById('moodOptionsList');
-                if(!list) return;
-                const moods = [
-                    { text: '🔥 رايق ونشيط (أحتاج قهوة ثقيلة تقفل المزاج)', itemIndex: 0 },
-                    { text: '😌 منعش وفوق السحاب (مشروب بارد يروق الدم)', itemIndex: 1 },
-                    { text: '🍰 تعبان وأحتاج حلا يعدل اليوم', itemIndex: 2 }
-                ];
-
-                list.innerHTML = moods.map(m => `
-                    <button onclick="app.selectMood(${m.itemIndex})" class="w-full text-right p-3.5 rounded-2xl bg-white/5 hover:bg-amber-500/10 text-xs font-bold border border-white/5 text-slate-200 transition flex items-center justify-between group">
-                        <span>${m.text}</span>
-                        <i class="fa-solid fa-chevron-left text-slate-600 group-hover:text-amber-500 text-[10px] transition-colors"></i>
-                    </button>
-                `).join('');
-                document.getElementById('moodModal').classList.remove('hidden');
-            }
-
-            closeMoodModal() {
-                document.getElementById('moodModal').classList.add('hidden');
-            }
-
-            selectMood(index) {
-                const recommended = this.menu[index];
-                this.closeMoodModal();
-                this.showAlert('اختيار الذكاء الاصطناعي ☕', `بناءً على مزاجك، نرشح لك: (${recommended.name}) بسعر ${recommended.price} ريال. تم إضافته لسلتك!`, 'success');
-                this.addToCart(recommended.id);
-            }
-
-            showAlert(title, message, type) {
-                const modal = document.getElementById('customAlertModal');
-                document.getElementById('alertTitle').textContent = title;
-                document.getElementById('alertMessage').textContent = message;
-                const iconContainer = document.getElementById('alertIconContainer');
-                const btnEl = document.getElementById('alertButton');
-
-                if (type === 'success') {
-                    iconContainer.className = "w-16 h-16 mx-auto rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-2xl border border-emerald-500/20";
-                    iconContainer.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
-                    btnEl.className = "w-full py-3 rounded-2xl text-xs font-bold text-white shadow-lg bg-emerald-600 hover:bg-emerald-500 active:scale-95 transition";
-                } else if (type === 'error') {
-                    iconContainer.className = "w-16 h-16 mx-auto rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center text-2xl border border-rose-500/20";
-                    iconContainer.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
-                    btnEl.className = "w-full py-3 rounded-2xl text-xs font-bold text-white shadow-lg bg-rose-600 hover:bg-rose-500 active:scale-95 transition";
-                } else {
-                    iconContainer.className = "w-16 h-16 mx-auto rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center text-2xl border border-amber-500/20";
-                    iconContainer.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
-                    btnEl.className = "w-full py-3 rounded-2xl text-xs font-bold text-white shadow-lg bg-amber-600 hover:bg-amber-500 active:scale-95 transition";
-                }
-                modal.classList.remove('hidden');
-            }
-
-            closeAlert() {
-                document.getElementById('customAlertModal').classList.add('hidden');
-            }
-        }
-
-        const app = new CafeApp();
-    </script>
+    <!-- استدعاء ملف الـ JavaScript الخارجي المربوط صح -->
+    <script src="app.js"></script>
 </body>
 </html>

@@ -3,19 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الجود كافيه | تجربة استثنائية</title>
+    <title>الجود كافيه | قهوة تظبط المزاج</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121110" id="themeColorMeta">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
+        tailwind.config = { darkMode: 'class' }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 dark:bg-[#0f0e0d] text-slate-800 dark:text-slate-100 pb-36 transition-colors duration-300 selection:bg-amber-500 selection:text-black">
+<body class="bg-slate-100 dark:bg-[#0f0e0d] text-slate-800 dark:text-slate-100 pb-36 transition-colors duration-300 selection:bg-amber-500 selection:text-black">
 
     <!-- الهيدر الفاخر -->
     <header class="sticky top-0 z-40 border-b border-slate-200 dark:border-white/10 backdrop-blur-xl bg-white/85 dark:bg-[#0f0e0d]/85 transition-colors duration-300">
@@ -27,16 +25,14 @@
                 </div>
                 <div>
                     <h1 class="font-black text-sm md:text-base tracking-wide text-amber-600 dark:text-amber-500">الجود كافيه</h1>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 tracking-wider">ألذ قهوة مختصة، بروقان تام</p>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">كيف حال المزاج اليوم؟</p>
                 </div>
             </div>
             
             <div class="flex items-center gap-2">
-                <!-- زر تبديل الثيم (دارك / لايت) -->
                 <button onclick="app.toggleTheme()" class="w-10 h-10 rounded-2xl bg-slate-200 dark:bg-white/5 border border-slate-300 dark:border-white/10 flex items-center justify-center text-amber-600 dark:text-amber-400 hover:scale-105 active:scale-95 transition">
                     <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
                 </button>
-                <!-- زر تثبيت التطبيق -->
                 <button id="installPwaBtn" onclick="app.installPwa()" class="hidden bg-slate-200 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-amber-600 dark:text-amber-400 px-3 py-2 rounded-2xl text-xs font-bold items-center gap-1.5 hover:bg-slate-300 dark:hover:bg-white/10 transition">
                     <i class="fa-solid fa-download"></i> تثبيت
                 </button>
@@ -47,33 +43,33 @@
         </div>
     </header>
 
-    <!-- المحتوى الرئيسي -->
+    <!-- المحتوى الرئيسي مع ضمان التنسيق المتجاوب للكمبيوتر والجوال -->
     <main class="max-w-2xl mx-auto p-4 space-y-6">
         
-        <!-- البانر والنبذة -->
+        <!-- البانر والنبذة البشرية -->
         <section class="relative bg-gradient-to-br from-amber-100 dark:from-amber-950/50 via-slate-100 dark:via-[#161412] to-white dark:to-[#121110] p-6 md:p-8 rounded-[2.5rem] border border-amber-500/20 shadow-2xl overflow-hidden text-center space-y-3 transition-colors duration-300">
             <div class="absolute -right-10 -top-10 w-32 h-32 bg-amber-600/10 rounded-full blur-3xl"></div>
-            <span class="inline-block bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-bold px-3.5 py-1.5 rounded-full border border-amber-500/20 tracking-widest uppercase">مرحباً بكم في الجود كافيه</span>
-            <h2 class="font-black text-xl md:text-2xl text-slate-900 dark:text-white leading-tight">حيث تلتئم تفاصيل المزاج الهادئ ☕</h2>
-            <p class="text-xs md:text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-lg mx-auto">نقدم لك أجود أنواع القهوة المختصة والحلويات الطازجة المصنوعة بكل حب لتناسب ذائقتك الرفيعة.</p>
+            <span class="inline-block bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-bold px-3.5 py-1.5 rounded-full border border-amber-500/20 tracking-widest uppercase">يا هلا فيك فـ الجود</span>
+            <h2 class="font-black text-xl md:text-2xl text-slate-900 dark:text-white leading-tight">القهوة اللي تعدل الراس على اصولها ☕</h2>
+            <p class="text-xs md:text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-lg mx-auto">سواء تحب الكيف الثقيل ولا الحلا اللي يروق الجو، جهزنا لك كل شي يفتح النفس ويزين جلستك.</p>
         </section>
 
         <!-- الخدمات -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div class="bg-white dark:bg-[#171513] border border-slate-200 dark:border-white/5 p-4 rounded-3xl text-center space-y-1 shadow-sm transition-colors duration-300">
+            <div class="bg-white dark:bg-[#171513] border border-slate-200 dark:border-white/5 p-4 rounded-3xl text-center space-y-1 shadow-sm">
                 <i class="fa-solid fa-clock text-amber-600 dark:text-amber-500 text-base mb-1"></i>
-                <h4 class="font-bold text-xs text-slate-800 dark:text-white">أوقات العمل</h4>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400">يومياً من 6 ص إلى 12 م</p>
+                <h4 class="font-bold text-xs text-slate-800 dark:text-white">أوقاتنا معك</h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">من 5 العصر لين 12 بالليل</p>
             </div>
-            <div class="bg-white dark:bg-[#171513] border border-slate-200 dark:border-white/5 p-4 rounded-3xl text-center space-y-1 shadow-sm transition-colors duration-300">
+            <div class="bg-white dark:bg-[#171513] border border-slate-200 dark:border-white/5 p-4 rounded-3xl text-center space-y-1 shadow-sm">
                 <i class="fa-solid fa-wifi text-amber-600 dark:text-amber-500 text-base mb-1"></i>
-                <h4 class="font-bold text-xs text-slate-800 dark:text-white">خدمة سريعة & Wi-Fi</h4>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400">جلسات هادئة وإنترنت فائق</p>
+                <h4 class="font-bold text-xs text-slate-800 dark:text-white">قعدة وراوقان</h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">وايفاي سريع وجلسات ترد الروح</p>
             </div>
-            <div class="bg-white dark:bg-[#171513] border border-slate-200 dark:border-white/5 p-4 rounded-3xl text-center space-y-1 shadow-sm transition-colors duration-300">
+            <div class="bg-white dark:bg-[#171513] border border-slate-200 dark:border-white/5 p-4 rounded-3xl text-center space-y-1 shadow-sm">
                 <i class="fa-solid fa-truck text-amber-600 dark:text-amber-500 text-base mb-1"></i>
-                <h4 class="font-bold text-xs text-slate-800 dark:text-white">توصيل سريع</h4>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400">اطلب عبر الواتساب ويصلك طازجاً</p>
+                <h4 class="font-bold text-xs text-slate-800 dark:text-white">طلبك يوصلك</h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">اطرش طلبك واتساب ويوصلك حار</p>
             </div>
         </div>
 
@@ -82,34 +78,32 @@
             <div class="relative z-10 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div class="space-y-1 text-center sm:text-right">
                     <h3 class="font-bold text-sm flex items-center justify-center sm:justify-start gap-2 text-amber-300">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> وش مزاجك اليوم؟
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> محتار وش تطلب اليوم؟
                     </h3>
-                    <p class="text-xs text-amber-100/80">دعنا نختار المشروب الأنسب لحالتك الآن</p>
+                    <p class="text-xs text-amber-100/80">علمنا كيف مزاجك ونحن بنضبطك بالشي اللي يناسبك</p>
                 </div>
                 <button onclick="app.openMoodModal()" class="w-full sm:w-auto bg-white text-amber-950 text-xs font-black px-5 py-3 rounded-2xl shadow-lg active:scale-95 transition-all hover:bg-amber-100">
-                    اختار لي ✨
+                    اختر لي شي يروقني ✨
                 </button>
             </div>
         </div>
 
-        <!-- أزرار تصنيف الأقسام -->
+        <!-- أزرار الأقسام -->
         <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-            <button onclick="app.filterCategory('all')" id="cat-all" class="category-btn px-4 py-2 rounded-2xl text-xs font-bold bg-amber-600 text-white transition whitespace-nowrap shadow-sm">الكل</button>
+            <button onclick="app.filterCategory('all')" id="cat-all" class="category-btn px-4 py-2 rounded-2xl text-xs font-bold bg-amber-600 text-white transition whitespace-nowrap shadow-sm">كل المنيو</button>
             <button onclick="app.filterCategory('hot')" id="cat-hot" class="category-btn px-4 py-2 rounded-2xl text-xs font-bold bg-white dark:bg-[#171513] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5 transition whitespace-nowrap shadow-sm">☕ مشروبات ساخنة</button>
             <button onclick="app.filterCategory('cold')" id="cat-cold" class="category-btn px-4 py-2 rounded-2xl text-xs font-bold bg-white dark:bg-[#171513] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5 transition whitespace-nowrap shadow-sm">🥤 مشروبات باردة</button>
-            <button onclick="app.filterCategory('dessert')" id="cat-dessert" class="category-btn px-4 py-2 rounded-2xl text-xs font-bold bg-white dark:bg-[#171513] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5 transition whitespace-nowrap shadow-sm">🍰 الحلا والحلويات</button>
+            <button onclick="app.filterCategory('dessert')" id="cat-dessert" class="category-btn px-4 py-2 rounded-2xl text-xs font-bold bg-white dark:bg-[#171513] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/5 transition whitespace-nowrap shadow-sm">🍰 الحلا والطيبات</button>
         </div>
 
-        <!-- قائمة المنيو -->
+        <!-- المنيو -->
         <div class="space-y-3">
-            <div id="menuList" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <!-- يتم تعبئتها ديناميكياً -->
-            </div>
+            <div id="menuList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
         </div>
 
-        <!-- قسم التواصل -->
+        <!-- التواصل -->
         <section class="bg-white dark:bg-[#171513] border border-slate-200 dark:border-white/5 p-5 md:p-6 rounded-[2.5rem] space-y-4 shadow-xl transition-colors duration-300">
-            <h3 class="text-center font-bold text-xs text-slate-600 dark:text-slate-300 tracking-wider uppercase">تابع حسابات الجود كافيه وتواصل معنا</h3>
+            <h3 class="text-center font-bold text-xs text-slate-600 dark:text-slate-300 tracking-wider uppercase">حياك بحساباتنا وتواصل معنا أي وقت</h3>
             
             <div class="grid grid-cols-3 gap-2">
                 <a href="https://instagram.com" target="_blank" class="flex flex-col items-center justify-center p-3.5 rounded-2xl bg-slate-100 dark:bg-[#201d1a] border border-slate-200 dark:border-white/5 hover:border-amber-500/40 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 transition-all group">
@@ -134,7 +128,7 @@
         <!-- الحقوق -->
         <footer class="text-center pt-4 pb-6 space-y-1">
             <p class="text-xs text-slate-500 font-medium">جميع الحقوق محفوظة © 2026 <span class="text-amber-600 dark:text-amber-500 font-bold">الجود كافيه</span></p>
-            <p class="text-[10px] text-slate-400 dark:text-slate-600">هندسة وتطوير البرمجيات المتقدمة</p>
+            <p class="text-[10px] text-slate-400 dark:text-slate-600">مصنوع بحب وبروقان تام</p>
         </footer>
     </main>
 
@@ -161,48 +155,48 @@
         <div class="bg-white dark:bg-[#181614] border border-slate-200 dark:border-white/10 w-full max-w-md rounded-[2.5rem] p-6 space-y-4 shadow-2xl animate-in transition-colors duration-300">
             <div class="flex justify-between items-center">
                 <h3 class="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-2">
-                    <i class="fa-solid fa-basket-shopping text-amber-600 dark:text-amber-500"></i> سلة المشتريات
+                    <i class="fa-solid fa-basket-shopping text-amber-600 dark:text-amber-500"></i> سلة طلباتك
                 </h3>
                 <button onclick="app.toggleCartModal(false)" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <p class="text-xs text-slate-500 dark:text-slate-400">تعديل الكميات أو حذف المنتجات:</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">تقدر تعدل الكميات أو تحذف أي شي ما تبيه:</p>
             
             <div id="cartItemsList" class="space-y-2.5 max-h-60 overflow-y-auto pr-1"></div>
 
             <div class="pt-2 border-t border-slate-200 dark:border-white/10 flex justify-between items-center">
-                <span class="text-xs text-slate-500 dark:text-slate-400">المجموع الكلي:</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400">المجموع النهائي:</span>
                 <span class="font-bold text-amber-600 dark:text-amber-400 text-sm"><span id="cartModalTotal">0</span> ريال</span>
             </div>
 
             <button onclick="app.sendToWhatsApp(); app.toggleCartModal(false);" class="w-full bg-emerald-600 text-white py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg hover:bg-emerald-500 transition">
-                <i class="fa-brands fa-whatsapp text-base"></i> إرسال الطلب لخدمة العملاء
+                <i class="fa-brands fa-whatsapp text-base"></i>أكد طلبك 
             </button>
         </div>
     </div>
 
-    <!-- نافذة كرت الولاء -->
+    <!-- نافذة كرت الولاء (أختام بصورة الشعار) -->
     <div id="loyaltyModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-[#181614] border border-slate-200 dark:border-white/10 w-full max-w-sm rounded-[2.5rem] p-6 space-y-4 shadow-2xl animate-in transition-colors duration-300">
             <div class="flex justify-between items-center">
                 <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <img src="logo.png" class="w-6 h-6 rounded-full object-cover border border-amber-500"> كرت الولاء الرقمي
+                    <img src="logo.png" class="w-6 h-6 rounded-full object-cover border border-amber-500"> كرت الولاء حقك
                 </h3>
                 <button onclick="app.toggleLoyalty(false)" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">اجمع 6 أختام بمسح QR اليومي واحصل على مشروبك السابع مجاناً!</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">اجمع 6 أختام بمسح الـ QR عندنا بالكافيه، وخذ المشروب السابع على حسابنا!</p>
             
             <div class="grid grid-cols-3 gap-3 py-2" id="stampsGrid"></div>
 
             <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-500/20 p-3.5 rounded-2xl space-y-2">
                 <div class="flex justify-between items-center text-xs font-bold text-amber-700 dark:text-amber-400">
-                    <span><i class="fa-solid fa-qrcode"></i> QR اليومي المتغير</span>
+                    <span><i class="fa-solid fa-qrcode"></i> QR اليوم المتغير</span>
                     <span id="qrDateBadge" class="text-[10px] bg-amber-200 dark:bg-amber-500/20 px-2 py-0.5 rounded-md text-amber-800 dark:text-amber-300"></span>
                 </div>
                 <div class="flex gap-2">
-                    <input type="password" id="cashierPinInput" placeholder="رمز تحقق الكاشير" class="flex-1 bg-white dark:bg-black/40 border border-amber-300 dark:border-amber-500/30 rounded-xl px-3 py-2 text-xs text-center text-slate-800 dark:text-white focus:outline-none focus:border-amber-600">
-                    <button onclick="app.verifyAndAddStamp()" class="bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md active:scale-95 transition hover:bg-amber-500">اعتمد</button>
+                    <input type="password" id="cashierPinInput" placeholder="رمز الكاشير" class="flex-1 bg-white dark:bg-black/40 border border-amber-300 dark:border-amber-500/30 rounded-xl px-3 py-2 text-xs text-center text-slate-800 dark:text-white focus:outline-none focus:border-amber-600">
+                    <button onclick="app.verifyAndAddStamp()" class="bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md active:scale-95 transition hover:bg-amber-500">حط الختم</button>
                 </div>
             </div>
         </div>
@@ -215,21 +209,21 @@
                 <i class="fa-solid fa-headset"></i>
             </div>
             <div>
-                <h3 class="font-bold text-sm text-slate-800 dark:text-white">خدمة عملاء الجود كافيه</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">اختر الطريقة المناسبة للتواصل معنا:</p>
+                <h3 class="font-bold text-sm text-slate-800 dark:text-white">كلم خدمة العملاء فـ الجود</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">اختر الطريقة اللي تريحك للتواصل معنا:</p>
             </div>
             
             <div class="space-y-2 pt-2">
-                <a href="tel:+967700000000" class="w-full flex items-center justify-between p-3.5 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 text-xs font-bold text-slate-700 dark:text-slate-200 transition">
+                <a href="tel:+96776425406" class="w-full flex items-center justify-between p-3.5 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 text-xs font-bold text-slate-700 dark:text-slate-200 transition">
                     <span class="flex items-center gap-2.5"><i class="fa-solid fa-phone text-amber-600 dark:text-amber-500"></i> اتصال هاتفي مباشر</span>
                     <i class="fa-solid fa-chevron-left text-[10px] text-slate-400"></i>
                 </a>
-                <a href="sms:+967700000000" class="w-full flex items-center justify-between p-3.5 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 text-xs font-bold text-slate-700 dark:text-slate-200 transition">
-                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-message text-sky-500"></i> إرسال رسالة نصية (SMS)</span>
+                <a href="sms:+96776425406" class="w-full flex items-center justify-between p-3.5 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 text-xs font-bold text-slate-700 dark:text-slate-200 transition">
+                    <span class="flex items-center gap-2.5"><i class="fa-solid fa-message text-sky-500"></i> رسالة نصية (SMS)</span>
                     <i class="fa-solid fa-chevron-left text-[10px] text-slate-400"></i>
                 </a>
-                <a href="https://wa.me/967700000000" target="_blank" class="w-full flex items-center justify-between p-3.5 rounded-2xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-xs font-bold text-emerald-600 dark:text-emerald-400 transition">
-                    <span class="flex items-center gap-2.5"><i class="fa-brands fa-whatsapp text-base"></i> دردشة خدمة العملاء (واتساب)</span>
+                <a href="https://wa.me/96776425406" target="_blank" class="w-full flex items-center justify-between p-3.5 rounded-2xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-xs font-bold text-emerald-600 dark:text-emerald-400 transition">
+                    <span class="flex items-center gap-2.5"><i class="fa-brands fa-whatsapp text-base"></i> دردشة الواتساب الفورية</span>
                     <i class="fa-solid fa-chevron-left text-[10px] text-emerald-600 dark:text-emerald-500"></i>
                 </a>
             </div>
@@ -241,8 +235,8 @@
     <!-- نافذة المزاج -->
     <div id="moodModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-[#181614] border border-slate-200 dark:border-white/10 w-full max-w-sm rounded-[2.5rem] p-6 space-y-4 shadow-2xl animate-in transition-colors duration-300">
-            <h3 class="font-bold text-sm text-slate-800 dark:text-white">✨ مختبر المزاج الذكي</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400">اختر حالتك الآن لنقترح عليك المشروب المناسب:</p>
+            <h3 class="font-bold text-sm text-slate-800 dark:text-white">✨ مختبر المزاج السريع</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">كيف مزاجك اليوم؟ اختر حالتك ونزبطك بحب :</p>
             <div class="space-y-2.5" id="moodOptionsList"></div>
             <button onclick="app.closeMoodModal()" class="w-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 py-3 rounded-2xl text-xs font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition">إغلاق</button>
         </div>
@@ -253,10 +247,10 @@
         <div class="bg-white dark:bg-[#181614] border border-slate-200 dark:border-white/10 w-full max-w-xs rounded-[2.5rem] p-6 text-center space-y-4 shadow-2xl animate-in transition-colors duration-300">
             <div id="alertIconContainer" class="w-16 h-16 mx-auto rounded-full flex items-center justify-center text-2xl shadow-inner"></div>
             <div class="space-y-1">
-                <h4 id="alertTitle" class="font-bold text-base text-slate-800 dark:text-white">عنوان الرسالة</h4>
-                <p id="alertMessage" class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">نص الرسالة.</p>
+                <h4 id="alertTitle" class="font-bold text-base text-slate-800 dark:text-white">تنبيه</h4>
+                <p id="alertMessage" class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">رسالة توضيحية.</p>
             </div>
-            <button onclick="app.closeAlert()" class="w-full py-3 rounded-2xl text-xs font-bold text-white shadow-lg transition active:scale-95" id="alertButton">حسناً</button>
+            <button onclick="app.closeAlert()" class="w-full py-3 rounded-2xl text-xs font-bold text-white shadow-lg transition active:scale-95" id="alertButton">زين، فهمت</button>
         </div>
     </div>
 

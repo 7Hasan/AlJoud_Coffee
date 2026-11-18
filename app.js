@@ -76,7 +76,7 @@ class CafeApp {
     }
 
     initTheme() {
-        const savedTheme = localStorage.getItem('cafe_theme') || 'dark';
+        const savedTheme = localStorage.getItem('cafe_theme') || 'light';
         if (savedTheme === 'light') {
             document.documentElement.classList.remove('dark');
             document.getElementById('themeIcon').className = "fa-solid fa-sun text-sm";

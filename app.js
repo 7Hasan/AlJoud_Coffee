@@ -22,6 +22,7 @@ class CafeApp {
     init() {
         this.initTheme();
         this.renderMenu();
+        this.updateCartUI();
         this.updateLoyaltyUI();
         this.setTodayQRBadge();
         this.setupPWAInstaller();
@@ -32,7 +33,7 @@ class CafeApp {
         if (!('serviceWorker' in navigator)) return;
 
         // لا نعيد تحميل الصفحة عند أول تثبيت؛ نحدّثها فقط عند وصول نسخة جديدة.
-        const hadController = Boolean(navigator.serviceWorker.controller);
+        let hasControlledPage = Boolean(navigator.serviceWorker.controller);
 
         navigator.serviceWorker.register('./sw.js')
             .then((registration) => {
@@ -47,7 +48,13 @@ class CafeApp {
                 document.addEventListener('visibilitychange', checkForUpdates);
 
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    if (hadController && !this.swRefreshing) {
+                    if (!hasControlledPage) {
+                        // نتجاهل أول تحكم عند تثبيت التطبيق لأول مرة.
+                        hasControlledPage = true;
+                        return;
+                    }
+
+                    if (!this.swRefreshing) {
                         this.swRefreshing = true;
                         window.location.reload();
                     }

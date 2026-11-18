@@ -3,6 +3,7 @@ class CafeApp {
         this.stamps = Math.min(6, Math.max(0, Number.parseInt(localStorage.getItem('cafe_stamps') || '0', 10) || 0));
         this.cart = [];
         this.currentCategory = 'all';
+        this.searchTerm = '';
         this.menu = [
             { id: 1, name: 'إسبريسو مكياتو فاخر', desc: 'قهوة مركزة تعدل المزاج برغوة ناعمة تروق الراس', price: 1500, category: 'hot' },
             { id: 2, name: 'شاي كرك عدني أصلي', desc: 'على اصولد بالهيل والبهارات اللي تضبط الدماغ', price: 1000, category: 'hot' },
@@ -82,6 +83,11 @@ class CafeApp {
         }
     }
 
+    searchMenu(value) {
+        this.searchTerm = String(value || '').trim().toLocaleLowerCase('ar');
+        this.renderMenu();
+    }
+
     filterCategory(cat) {
         this.currentCategory = cat;
         document.querySelectorAll('.category-btn').forEach(b => {
@@ -98,9 +104,23 @@ class CafeApp {
         const container = document.getElementById('menuList');
         if(!container) return;
         
-        const filtered = this.currentCategory === 'all' 
-            ? this.menu 
-            : this.menu.filter(i => i.category === this.currentCategory);
+        const filtered = this.menu.filter(item => {
+            const matchesCategory = this.currentCategory === 'all' || item.category === this.currentCategory;
+            const searchableText = `${item.name} ${item.desc}`.toLocaleLowerCase('ar');
+            const matchesSearch = !this.searchTerm || searchableText.includes(this.searchTerm);
+            return matchesCategory && matchesSearch;
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = `
+                <div class="md:col-span-2 text-center bg-white dark:bg-[#171513] border border-dashed border-slate-300 dark:border-white/10 rounded-3xl p-8 space-y-2">
+                    <i class="fa-solid fa-mug-hot text-2xl text-amber-500"></i>
+                    <p class="font-bold text-sm text-slate-700 dark:text-slate-200">ما لقينا هذا الاختيار</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">جرّب كلمة ثانية أو اختر قسمًا مختلفًا.</p>
+                </div>
+            `;
+            return;
+        }
 
         container.innerHTML = filtered.map(item => `
             <div class="bg-white dark:bg-[#171513] border border-slate-200 dark:border-white/5 p-4 rounded-3xl flex justify-between items-center transition-all duration-300 hover:border-amber-500/35 hover:bg-slate-50 dark:hover:bg-[#1c1916] shadow-sm group">

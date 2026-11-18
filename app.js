@@ -26,7 +26,35 @@ class CafeApp {
         this.updateLoyaltyUI();
         this.setTodayQRBadge();
         this.setupPWAInstaller();
+        this.setupModalInteractions();
         this.registerServiceWorker();
+    }
+
+    setupModalInteractions() {
+        const modalIds = ['customAlertModal', 'cartModal', 'loyaltyModal', 'contactModal', 'moodModal'];
+
+        // إغلاق النافذة عند الضغط على الخلفية، دون إغلاقها عند الضغط داخل محتواها.
+        modalIds.forEach((id) => {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        });
+
+        // زر Escape يغلق أعلى نافذة ظاهرة فقط.
+        document.addEventListener('keydown', (event) => {
+            if (event.key !== 'Escape') return;
+
+            const visibleModal = modalIds
+                .map((id) => document.getElementById(id))
+                .find((modal) => modal && !modal.classList.contains('hidden'));
+
+            if (visibleModal) visibleModal.classList.add('hidden');
+        });
     }
 
     registerServiceWorker() {
@@ -160,7 +188,7 @@ class CafeApp {
 
         if (filtered.length === 0) {
             container.innerHTML = `
-                <div class="md:col-span-2 text-center bg-white dark:bg-[#171513] border border-dashed border-slate-300 dark:border-white/10 rounded-3xl p-8 space-y-2">
+                <div class="md:col-span-2 xl:col-span-3 text-center bg-white dark:bg-[#171513] border border-dashed border-slate-300 dark:border-white/10 rounded-3xl p-8 space-y-2">
                     <i class="fa-solid fa-mug-hot text-2xl text-amber-500"></i>
                     <p class="font-bold text-sm text-slate-700 dark:text-slate-200">ما لقينا هذا الاختيار</p>
                     <p class="text-xs text-slate-500 dark:text-slate-400">جرّب كلمة ثانية أو اختر قسمًا مختلفًا.</p>
@@ -170,16 +198,23 @@ class CafeApp {
         }
 
         container.innerHTML = filtered.map(item => `
-            <div class="bg-white dark:bg-[#171513] border border-slate-200 dark:border-white/5 p-4 rounded-3xl flex justify-between items-center transition-all duration-300 hover:border-amber-500/35 hover:bg-slate-50 dark:hover:bg-[#1c1916] shadow-sm group">
-                <div class="flex-1 pl-3">
-                    <h4 class="font-bold text-xs md:text-sm text-slate-800 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">${item.name}</h4>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2">${item.desc}</p>
-                    <span class="text-amber-600 dark:text-amber-400 font-black text-xs">${item.price} ريال</span>
+            <article class="menu-card group relative flex min-h-[150px] flex-col justify-between overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-xl dark:border-white/5 dark:bg-[#171513] dark:hover:bg-[#1c1916]">
+                <div class="absolute -left-8 -top-8 h-24 w-24 rounded-full bg-amber-500/5 transition-transform duration-500 group-hover:scale-150"></div>
+                <div class="relative">
+                    <div class="mb-3 flex items-start justify-between gap-3">
+                        <span class="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[10px] font-bold text-amber-700 dark:text-amber-400">${item.category === 'hot' ? 'مشروب ساخن' : item.category === 'cold' ? 'مشروب بارد' : 'حلى'}</span>
+                        <i class="fa-solid ${item.category === 'hot' ? 'fa-mug-hot' : item.category === 'cold' ? 'fa-glass-water' : 'fa-cake-candles'} text-lg text-amber-600/70 dark:text-amber-500/70" aria-hidden="true"></i>
+                    </div>
+                    <h4 class="text-sm font-black leading-6 text-slate-900 transition-colors group-hover:text-amber-700 dark:text-white dark:group-hover:text-amber-400 md:text-base">${item.name}</h4>
+                    <p class="mt-1 min-h-10 text-xs leading-5 text-slate-500 dark:text-slate-400">${item.desc}</p>
                 </div>
-                <button onclick="app.addToCart(${item.id})" class="bg-amber-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-950/40 active:scale-90 transition-all hover:bg-amber-500">
-                    <i class="fa-solid fa-plus text-xs"></i>
-                </button>
-            </div>
+                <div class="relative mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-3 dark:border-white/5">
+                    <span class="text-sm font-black tabular-nums text-amber-700 dark:text-amber-400">${item.price} <span class="text-[10px] font-bold">ريال</span></span>
+                    <button type="button" aria-label="إضافة ${item.name} إلى السلة" onclick="app.addToCart(${item.id})" class="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-amber-950/15 transition hover:bg-amber-500 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500">
+                        <i class="fa-solid fa-plus text-[10px]" aria-hidden="true"></i> أضف للسلة
+                    </button>
+                </div>
+            </article>
         `).join('');
     }
 
@@ -249,7 +284,7 @@ class CafeApp {
             <div class="bg-slate-100 dark:bg-black/30 border border-slate-200 dark:border-white/5 p-3 rounded-2xl flex justify-between items-center">
                 <div class="flex-1">
                     <h5 class="font-bold text-xs text-slate-800 dark:text-white">${item.name}</h5>
-                    <span class="text-[10px] text-amber-600 dark:text-amber-400">${item.price * item.qty} ريال</span>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400">${item.price} ريال × ${item.qty}</span><span class="mt-1 block text-[11px] font-bold text-amber-600 dark:text-amber-400">الإجمالي: ${item.price * item.qty} ريال</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="app.changeQty(${item.id}, -1)" class="w-7 h-7 rounded-2xl bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 text-slate-700 dark:text-white flex items-center justify-center text-xs"><i class="fa-solid fa-minus"></i></button>

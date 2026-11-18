@@ -27,6 +27,7 @@ class CafeApp {
         this.setTodayQRBadge();
         this.setupPWAInstaller();
         this.setupModalInteractions();
+        this.setupOrderDetails();
         this.registerServiceWorker();
     }
 
@@ -306,21 +307,70 @@ class CafeApp {
         }
     }
 
+    setupOrderDetails() {
+        const orderType = document.getElementById('orderType');
+        if (!orderType) return;
+
+        const updateFields = () => {
+            const isDineIn = orderType.value === 'dine-in';
+            const isDelivery = orderType.value === 'delivery';
+            document.getElementById('tableNumberField')?.classList.toggle('hidden', !isDineIn);
+            document.getElementById('deliveryAddressField')?.classList.toggle('hidden', !isDelivery);
+        };
+
+        orderType.addEventListener('change', updateFields);
+        updateFields();
+    }
+
     sendToWhatsApp() {
         if (this.cart.length === 0) {
             this.showAlert('السلة فارغة', 'أضف المنتجات التي ترغب بها أولاً، وبعدها أرسل طلبك.', 'info');
             return;
         }
 
-        const phone = "967776425406";
+        const customerName = document.getElementById('customerName')?.value.trim() || '';
+        const orderType = document.getElementById('orderType')?.value || 'dine-in';
+        const tableNumber = document.getElementById('tableNumber')?.value.trim() || '';
+        const deliveryAddress = document.getElementById('deliveryAddress')?.value.trim() || '';
+        const orderNotes = document.getElementById('orderNotes')?.value.trim() || '';
+
+        if (!customerName) {
+            this.showAlert('نحتاج اسمك أولاً', 'اكتب اسم صاحب الطلب حتى يعرف فريق الكافي لمن يجهز الطلب.', 'info');
+            document.getElementById('customerName')?.focus();
+            return;
+        }
+
+        if (orderType === 'delivery' && !deliveryAddress) {
+            this.showAlert('عنوان التوصيل مطلوب', 'اكتب المنطقة والعنوان وأقرب معلم حتى نعرف مكان التوصيل.', 'info');
+            document.getElementById('deliveryAddress')?.focus();
+            return;
+        }
+
+        if (orderType === 'dine-in' && tableNumber && (!Number.isInteger(Number(tableNumber)) || Number(tableNumber) < 1 || Number(tableNumber) > 99)) {
+            this.showAlert('رقم الطاولة غير صحيح', 'أدخل رقم طاولة صحيحًا من 1 إلى 99، أو اترك الحقل فارغًا.', 'info');
+            document.getElementById('tableNumber')?.focus();
+            return;
+        }
+
+        const orderTypeLabels = { 'dine-in': 'داخل الكافي', 'takeaway': 'سفري / استلام', 'delivery': 'توصيل' };
+        const phone = '967776425406';
         const itemsText = this.cart.map(item =>
-            `▪️ ${item.name} (x${item.qty}) - ${item.price * item.qty} ريال`
+            `▪️ ${item.name} (×${item.qty}) - ${item.price * item.qty} ريال`
         ).join('\n');
         const total = this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        const message = `✨ *يا هلا، عندي طلب جديد من الجود كافيه*\n------------------\n${itemsText}\n------------------\n*المجموع الكلي: ${total} ريال*`;
+        const details = [
+            `👤 اسم العميل: ${customerName}`,
+            `📦 نوع الطلب: ${orderTypeLabels[orderType] || orderTypeLabels['dine-in']}`,
+            orderType === 'dine-in' && tableNumber ? `🪑 رقم الطاولة: ${tableNumber}` : '',
+            orderType === 'delivery' ? `📍 عنوان التوصيل: ${deliveryAddress}` : '',
+            orderNotes ? `📝 ملاحظات: ${orderNotes}` : ''
+        ].filter(Boolean).join('\n');
+
+        const message = `✨ *طلب جديد من الجود كافيه*\n------------------\n${details}\n------------------\n*تفاصيل الطلب:*\n${itemsText}\n------------------\n*المجموع الكلي: ${total} ريال*`;
         const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
         window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+        this.toggleCartModal(false);
     }
 
     toggleLoyalty(show) {

@@ -85,3 +85,45 @@ input:focus-visible {
 .scrollbar-none::-webkit-scrollbar {
     display: none;
 }
+
+
+/* بطاقات المنيو: تسلسل بصري أوضح وسطح تفاعلي هادئ. */
+.menu-card {
+    isolation: isolate;
+}
+
+.menu-card button {
+    min-height: 42px;
+    white-space: nowrap;
+}
+
+.menu-card:focus-within {
+    border-color: rgb(217 119 6 / 0.55);
+    box-shadow: 0 0 0 3px rgb(217 119 6 / 0.08);
+}
+
+#cartItemsList {
+    scrollbar-width: thin;
+    scrollbar-color: #d6a04a transparent;
+}
+
+#cartItemsList > div {
+    gap: 0.75rem;
+}
+
+@media (min-width: 1280px) {
+    .menu-card {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .menu-card {
+        padding: 1rem;
+    }
+
+    .menu-card button {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}

@@ -2,16 +2,43 @@
 
 body {
     font-family: 'Cairo', sans-serif;
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* تنسيق احترافي للشاشات الكبيرة (الكمبيوتر) بحيث تعرض بتصميم مرن ومرتب */
+/* تنسيق مرن للشاشات الكبيرة مع إبقاء المحتوى في عرض مريح للقراءة. */
 @media (min-width: 1024px) {
     body {
         background-color: #0b0a09 !important;
     }
-    main, header > div {
+
+    main,
+    header > div {
         max-width: 750px !important;
     }
+}
+
+/* إبقاء النوافذ قابلة للاستخدام على الشاشات القصيرة والصغيرة. */
+.fixed.inset-0 {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.fixed.inset-0 > div {
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#cartBar {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* إظهار مؤشر واضح عند التنقل بلوحة المفاتيح. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    outline: 2px solid #d97706;
+    outline-offset: 3px;
 }
 
 @keyframes scaleUp {
@@ -23,17 +50,31 @@ body {
     animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 ::-webkit-scrollbar {
     width: 4px;
     height: 4px;
 }
+
 ::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 4px;
 }
+
 .dark ::-webkit-scrollbar-thumb {
     background: #332f2b;
 }
+
 .scrollbar-none::-webkit-scrollbar {
     display: none;
 }

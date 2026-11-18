@@ -88,6 +88,20 @@
             </div>
         </div>
 
+        <!-- البحث في المنيو -->
+        <section class="relative">
+            <label for="menuSearch" class="sr-only">ابحث في المنيو</label>
+            <i class="fa-solid fa-magnifying-glass absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none"></i>
+            <input
+                id="menuSearch"
+                type="search"
+                placeholder="وش تشتهي اليوم؟ ابحث عن مشروب أو حلى..."
+                oninput="app.searchMenu(this.value)"
+                autocomplete="off"
+                class="w-full bg-white dark:bg-[#171513] border border-slate-200 dark:border-white/10 rounded-2xl py-3.5 pr-11 pl-4 text-xs text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition"
+            >
+        </section>
+
         <!-- أزرار الأقسام -->
         <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
             <button onclick="app.filterCategory('all')" id="cat-all" class="category-btn px-4 py-2 rounded-2xl text-xs font-bold bg-amber-600 text-white transition whitespace-nowrap shadow-sm">كل المنيو</button>

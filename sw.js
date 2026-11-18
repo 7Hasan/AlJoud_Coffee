@@ -1,9 +1,9 @@
 /*
  * AlJoud Cafe service worker
- * Caches the local app shell and provides an offline fallback for the home page.
- * External CDN assets are left to the browser's normal network/cache behavior.
+ * Refreshes the local app shell when a new deployment is available.
+ * Keeps the latest successful same-origin GET responses for offline use.
  */
-const CACHE_NAME = 'aljoud-cafe-shell-v2';
+const CACHE_NAME = 'aljoud-cafe-shell-v3';
 const APP_SHELL = [
     './',
     './index.html',
@@ -13,7 +13,6 @@ const APP_SHELL = [
     './logo.png'
 ];
 
-// Install: save the essential local files before activating this worker.
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
@@ -22,7 +21,6 @@ self.addEventListener('install', (event) => {
     );
 });
 
-// Activate: remove older app-shell caches, then take control of open pages.
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys()
@@ -35,8 +33,6 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch: use the network when available and keep successful same-origin GETs cached.
-// If the user is offline, serve the cached request or the cached home page.
 self.addEventListener('fetch', (event) => {
     const request = event.request;
     const requestUrl = new URL(request.url);
@@ -50,7 +46,10 @@ self.addEventListener('fetch', (event) => {
             .then((response) => {
                 if (response && response.ok) {
                     const responseCopy = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => cache.put(request, responseCopy));
+                    event.waitUntil(
+                        caches.open(CACHE_NAME)
+                            .then((cache) => cache.put(request, responseCopy))
+                    );
                 }
                 return response;
             })

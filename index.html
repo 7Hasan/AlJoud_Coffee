@@ -185,12 +185,40 @@
             
             <div id="cartItemsList" class="space-y-2.5 max-h-60 overflow-y-auto pr-1"></div>
 
+            <!-- بيانات صاحب الطلب وطريقة الاستلام -->
+            <div class="space-y-3 border-t border-slate-200 dark:border-white/10 pt-4">
+                <div>
+                    <label for="customerName" class="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">اسم صاحب الطلب <span class="text-rose-500">*</span></label>
+                    <input id="customerName" type="text" maxlength="60" autocomplete="name" required placeholder="اكتب اسمك" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs text-slate-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 dark:border-white/10 dark:bg-black/20 dark:text-white">
+                </div>
+                <div>
+                    <label for="orderType" class="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">نوع الطلب</label>
+                    <select id="orderType" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-black/20 dark:text-white">
+                        <option value="dine-in">داخل الكافي</option>
+                        <option value="takeaway">سفري / استلام</option>
+                        <option value="delivery">توصيل</option>
+                    </select>
+                </div>
+                <div id="tableNumberField">
+                    <label for="tableNumber" class="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">رقم الطاولة <span class="font-normal text-slate-400">(اختياري)</span></label>
+                    <input id="tableNumber" type="number" min="1" max="99" inputmode="numeric" placeholder="مثال: 5" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-black/20 dark:text-white">
+                </div>
+                <div id="deliveryAddressField" class="hidden">
+                    <label for="deliveryAddress" class="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">عنوان التوصيل <span class="text-rose-500">*</span></label>
+                    <textarea id="deliveryAddress" rows="2" maxlength="250" placeholder="اكتب المنطقة والعنوان وأقرب معلم" class="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-black/20 dark:text-white"></textarea>
+                </div>
+                <div>
+                    <label for="orderNotes" class="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-200">ملاحظات على الطلب <span class="font-normal text-slate-400">(اختياري)</span></label>
+                    <textarea id="orderNotes" rows="2" maxlength="250" placeholder="مثلاً: بدون سكر، أو ملاحظات أخرى..." class="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs text-slate-800 outline-none transition focus:border-amber-500 dark:border-white/10 dark:bg-black/20 dark:text-white"></textarea>
+                </div>
+            </div>
+
             <div class="pt-2 border-t border-slate-200 dark:border-white/10 flex justify-between items-center">
                 <span class="text-xs text-slate-500 dark:text-slate-400">المجموع النهائي:</span>
                 <span class="font-bold text-amber-600 dark:text-amber-400 text-sm"><span id="cartModalTotal">0</span> ريال</span>
             </div>
 
-            <button onclick="app.sendToWhatsApp(); app.toggleCartModal(false);" class="w-full bg-emerald-600 text-white py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg hover:bg-emerald-500 transition">
+            <button onclick="app.sendToWhatsApp()" class="w-full bg-emerald-600 text-white py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg hover:bg-emerald-500 transition">
                 <i class="fa-brands fa-whatsapp text-base"></i>أكد طلبك 
             </button>
         </div>

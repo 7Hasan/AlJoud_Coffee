@@ -3,17 +3,24 @@
 body {
     font-family: 'Cairo', sans-serif;
     -webkit-tap-highlight-color: transparent;
+    min-width: 320px;
 }
 
-/* تنسيق مرن للشاشات الكبيرة مع إبقاء المحتوى في عرض مريح للقراءة. */
+/* تخطيط مرن: استخدام مساحة الكمبيوتر بدل حصر الموقع بعرض الهاتف. */
 @media (min-width: 1024px) {
-    body {
-        background-color: #0b0a09 !important;
+    main,
+    header > div,
+    #cartBar > div {
+        max-width: 1280px !important;
     }
 
-    main,
-    header > div {
-        max-width: 750px !important;
+    main {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+
+    #menuList > div {
+        min-height: 150px;
     }
 }
 

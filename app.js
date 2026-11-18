@@ -1,6 +1,6 @@
 class CafeApp {
     constructor() {
-        this.stamps = parseInt(localStorage.getItem('cafe_stamps') || '0');
+        this.stamps = Math.min(6, Math.max(0, Number.parseInt(localStorage.getItem('cafe_stamps') || '0', 10) || 0));
         this.cart = [];
         this.currentCategory = 'all';
         this.menu = [
@@ -118,6 +118,8 @@ class CafeApp {
 
     addToCart(id) {
         const item = this.menu.find(i => i.id === id);
+        if (!item) return;
+
         let existing = this.cart.find(i => i.id === id);
         if (existing) {
             existing.qty++;
@@ -200,14 +202,20 @@ class CafeApp {
     }
 
     sendToWhatsApp() {
+        if (this.cart.length === 0) {
+            this.showAlert('السلة فارغة', 'أضف المنتجات التي ترغب بها أولاً، وبعدها أرسل طلبك.', 'info');
+            return;
+        }
+
         const phone = "967776425406";
-        let text = "✨ *يا هلا، عندي طلب جديد من الجود كافيه*%0A------------------%0A";
-        this.cart.forEach(item => {
-            text += `▪️ ${item.name} (x${item.qty}) - ${item.price * item.qty} ريال%0A`;
-        });
-        text += `------------------%0A*المجموع الكلي: ${this.cart.reduce((s, i) => s + (i.price * i.qty), 0)} ريال*`;
-        
-        window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+        const itemsText = this.cart.map(item =>
+            `▪️ ${item.name} (x${item.qty}) - ${item.price * item.qty} ريال`
+        ).join('\n');
+        const total = this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        const message = `✨ *يا هلا، عندي طلب جديد من الجود كافيه*\n------------------\n${itemsText}\n------------------\n*المجموع الكلي: ${total} ريال*`;
+        const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
     }
 
     toggleLoyalty(show) {

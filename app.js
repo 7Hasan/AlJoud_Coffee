@@ -14,6 +14,7 @@ class CafeApp {
             { id: 7, name: 'تشيز كيك التوت البلدي', desc: 'طازج وبارد يذوب بالفم ذوبان', price: 2500, category: 'dessert' },
             { id: 8, name: 'كيكة الشوكولاتة البلجيكية', desc: 'غرقانة صوص دافئ ومقرمشة تفتح النفس', price: 3500, category: 'dessert' }
         ];
+        this.cart = this.restoreCart();
         this.deferredPrompt = null;
         this.init();
     }
@@ -28,10 +29,49 @@ class CafeApp {
     }
 
     registerServiceWorker() {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(() => console.log('SW Active'))
-                .catch(err => console.log('SW Error: ', err));
+        if (!('serviceWorker' in navigator)) return;
+
+        // لا نعيد تحميل الصفحة عند أول تثبيت؛ نحدّثها فقط عند وصول نسخة جديدة.
+        const hadController = Boolean(navigator.serviceWorker.controller);
+
+        navigator.serviceWorker.register('./sw.js')
+            .then((registration) => {
+                const checkForUpdates = () => {
+                    if (document.visibilityState === 'visible') {
+                        registration.update().catch(err => console.log('SW Update Error: ', err));
+                    }
+                };
+
+                // فحص التحديثات دوريًا، دون تحديث الصفحة لمجرد مرور الوقت.
+                window.setInterval(checkForUpdates, 60000);
+                document.addEventListener('visibilitychange', checkForUpdates);
+
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (hadController && !this.swRefreshing) {
+                        this.swRefreshing = true;
+                        window.location.reload();
+                    }
+                });
+            })
+            .catch(err => console.log('SW Error: ', err));
+    }
+
+    restoreCart() {
+        try {
+            const savedCart = JSON.parse(localStorage.getItem('cafe_cart') || '[]');
+            if (!Array.isArray(savedCart)) return [];
+
+            // نستخدم بيانات المنتج الحالية من المنيو بدل الاحتفاظ بسعر قديم مخزن.
+            return savedCart.map(savedItem => {
+                const currentItem = this.menu.find(item => item.id === Number(savedItem.id));
+                const qty = Math.floor(Number(savedItem.qty));
+                return currentItem && qty > 0
+                    ? { ...currentItem, qty: Math.min(qty, 99) }
+                    : null;
+            }).filter(Boolean);
+        } catch (error) {
+            console.warn('Could not restore cart:', error);
+            return [];
         }
     }
 
@@ -167,6 +207,9 @@ class CafeApp {
     }
 
     updateCartUI() {
+        // حفظ السلة حتى لا تضيع عند تحديث نسخة التطبيق.
+        localStorage.setItem('cafe_cart', JSON.stringify(this.cart.map(({ id, qty }) => ({ id, qty }))));
+
         const cartBar = document.getElementById('cartBar');
         const totalSum = document.getElementById('cartTotalSum');
         const cartCountBadge = document.getElementById('cartCountBadge');

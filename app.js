@@ -75,7 +75,7 @@ class CafeApp {
             else if (localStorage.getItem('aljoud_nearby_enabled') === 'true') this.startProximityMonitoring();
         });
         this.updateNotificationStatus();
-        if (Notification.permission === 'granted' && this.fcmToken) {
+        if ('Notification' in window && Notification.permission === 'granted' && this.fcmToken) {
             this.showFcmTokenControl();
         }
     }

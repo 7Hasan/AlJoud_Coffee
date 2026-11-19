@@ -10,6 +10,7 @@ const APP_SHELL = [
     './style.css',
     './app.js',
     './manifest.json',
+    './notifications-config.js',
     './logo.png'
 ];
 

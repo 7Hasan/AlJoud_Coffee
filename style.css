@@ -127,3 +127,8 @@ input:focus-visible {
         padding-right: 0.75rem;
     }
 }
+
+
+/* إشعارات الجود */
+#enableNotificationsBtn:focus-visible,
+#enableNearbyBtn:focus-visible { outline: 2px solid #d97706; outline-offset: 3px; }

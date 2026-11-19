@@ -16,6 +16,11 @@ class CafeApp {
         ];
         this.cart = this.restoreCart();
         this.deferredPrompt = null;
+        // Coordinates remain unset until the cafe's verified map pin is supplied.
+        this.cafeLocation = window.ALJOUD_CAFE_LOCATION || null;
+        this.proximityWatchId = null;
+        this.proximityInside = false;
+        this.notificationRegistration = null;
         this.init();
     }
 
@@ -28,6 +33,7 @@ class CafeApp {
         this.setupPWAInstaller();
         this.setupModalInteractions();
         this.setupOrderDetails();
+        this.setupNotifications();
         this.registerServiceWorker();
     }
 
@@ -58,6 +64,127 @@ class CafeApp {
         });
     }
 
+    setupNotifications() {
+        document.getElementById('enableNotificationsBtn')?.addEventListener('click', () => this.enableNotifications());
+        document.getElementById('enableNearbyBtn')?.addEventListener('click', () => this.enableNearbyAlerts());
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') this.stopProximityMonitoring();
+            else if (localStorage.getItem('aljoud_nearby_enabled') === 'true') this.startProximityMonitoring();
+        });
+        this.updateNotificationStatus();
+    }
+
+    updateNotificationStatus() {
+        const status = document.getElementById('notificationStatus');
+        const enableButton = document.getElementById('enableNotificationsBtn');
+        const nearbyButton = document.getElementById('enableNearbyBtn');
+        if (!status) return;
+        if (!('Notification' in window)) {
+            status.textContent = 'هذا المتصفح لا يدعم إشعارات الويب.';
+            if (enableButton) enableButton.disabled = true;
+            if (nearbyButton) nearbyButton.disabled = true;
+            return;
+        }
+        if (Notification.permission === 'granted') {
+            status.textContent = 'إشعارات الجود مسموحة على هذا الجهاز.';
+            if (enableButton) enableButton.textContent = 'الإشعارات مسموحة ✓';
+        } else if (Notification.permission === 'denied') {
+            status.textContent = 'الإشعارات محظورة من إعدادات المتصفح. يمكنك تغيير الإذن من إعدادات الموقع.';
+        } else {
+            status.textContent = 'فعّل الإشعارات لتستقبل رسائل الجود على هذا الجهاز.';
+        }
+        if (nearbyButton) {
+            nearbyButton.disabled = !this.cafeLocation || Notification.permission !== 'granted';
+            nearbyButton.textContent = this.cafeLocation ? 'فعّل تنبيه الاقتراب (300م)' : 'تنبيه الاقتراب — بانتظار موقع الكافي';
+        }
+    }
+
+    async enableNotifications() {
+        if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+            this.showAlert('الإشعارات غير مدعومة', 'افتح الموقع من متصفح حديث يدعم إشعارات الويب.', 'info');
+            return;
+        }
+        try {
+            const permission = Notification.permission === 'default' ? await Notification.requestPermission() : Notification.permission;
+            if (permission !== 'granted') {
+                this.updateNotificationStatus();
+                this.showAlert('لم يتم تفعيل الإشعارات', 'يمكنك السماح بها من إعدادات المتصفح ثم المحاولة مرة أخرى.', 'info');
+                return;
+            }
+            const registration = this.notificationRegistration || await navigator.serviceWorker.ready;
+            this.notificationRegistration = registration;
+            await registration.showNotification('يا هلا بك في الجود ☕', {
+                body: 'من اليوم نخلي أخبارنا الحلوة توصلك بكل ود ❤️',
+                icon: './logo.png', badge: './logo.png', tag: 'aljoud-welcome',
+                data: { url: './index.html' }
+            });
+            this.updateNotificationStatus();
+            this.showAlert('تم السماح بإشعارات الجود ❤️', 'وصلتك رسالة ترحيبية تجريبية على هذا الجهاز. الإشعارات العامة عن بُعد تحتاج ربط خدمة إرسال آمنة في المرحلة التالية.', 'success');
+        } catch (error) {
+            console.error('Notification setup failed:', error);
+            this.showAlert('تعذر تفعيل الإشعارات', 'تأكد من فتح الموقع عبر HTTPS ثم أعد المحاولة.', 'error');
+        }
+    }
+
+    enableNearbyAlerts() {
+        if (!this.cafeLocation || !Number.isFinite(this.cafeLocation.lat) || !Number.isFinite(this.cafeLocation.lng)) {
+            this.showAlert('نحتاج موقع الكافي أولًا', 'أرسل رابط موقع الجود على خرائط Google حتى نحدد نطاق الاقتراب بدقة.', 'info');
+            return;
+        }
+        if (!('geolocation' in navigator) || Notification.permission !== 'granted') {
+            this.showAlert('تحقق من الإعدادات', 'نحتاج دعم تحديد الموقع والسماح بإشعارات الجود أولًا.', 'info');
+            return;
+        }
+        localStorage.setItem('aljoud_nearby_enabled', 'true');
+        this.startProximityMonitoring();
+        this.showAlert('تم تفعيل تنبيه الاقتراب', 'عندما يكون الموقع مفتوحًا وتكون داخل نطاق 300 متر، سنرحّب بك بإشعار لطيف. لا نتابع موقعك عند إغلاق الصفحة.', 'success');
+    }
+
+    startProximityMonitoring() {
+        if (!this.cafeLocation || !('geolocation' in navigator) || Notification.permission !== 'granted' ||
+            localStorage.getItem('aljoud_nearby_enabled') !== 'true' || document.visibilityState === 'hidden' || this.proximityWatchId !== null) return;
+        this.proximityWatchId = navigator.geolocation.watchPosition((position) => {
+            const distance = this.getDistanceMeters(position.coords.latitude, position.coords.longitude, this.cafeLocation.lat, this.cafeLocation.lng);
+            if (distance <= 300 && !this.proximityInside) {
+                this.proximityInside = true;
+                this.sendNearbyNotification();
+            } else if (distance > 350) {
+                this.proximityInside = false;
+            }
+        }, (error) => {
+            console.warn('Nearby location unavailable:', error.message);
+            this.stopProximityMonitoring();
+            const status = document.getElementById('notificationStatus');
+            if (status) status.textContent = 'تعذر الوصول لموقعك. تحقق من إذن الموقع وإعدادات GPS.';
+        }, { enableHighAccuracy: false, maximumAge: 15000, timeout: 12000 });
+    }
+
+    stopProximityMonitoring() {
+        if (this.proximityWatchId !== null && 'geolocation' in navigator) {
+            navigator.geolocation.clearWatch(this.proximityWatchId);
+            this.proximityWatchId = null;
+        }
+    }
+
+    getDistanceMeters(lat1, lon1, lat2, lon2) {
+        const radians = (degrees) => degrees * Math.PI / 180;
+        const radius = 6371000;
+        const dLat = radians(lat2 - lat1), dLon = radians(lon2 - lon1);
+        const value = Math.sin(dLat / 2) ** 2 + Math.cos(radians(lat1)) * Math.cos(radians(lat2)) * Math.sin(dLon / 2) ** 2;
+        return 2 * radius * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+    }
+
+    async sendNearbyNotification() {
+        try {
+            const registration = this.notificationRegistration || await navigator.serviceWorker.ready;
+            await registration.showNotification('الجود قريب منك ❤️', {
+                body: 'أنت قريب علينا، وإحنا مشتاقين لك ☕',
+                icon: './logo.png', badge: './logo.png', tag: 'aljoud-nearby',
+                data: { url: './index.html' }
+            });
+        } catch (error) { console.warn('Could not show nearby notification:', error); }
+    }
+
     registerServiceWorker() {
         if (!('serviceWorker' in navigator)) return;
 
@@ -66,6 +193,8 @@ class CafeApp {
 
         navigator.serviceWorker.register('./sw.js')
             .then((registration) => {
+                this.notificationRegistration = registration;
+                this.updateNotificationStatus();
                 const checkForUpdates = () => {
                     if (document.visibilityState === 'visible') {
                         registration.update().catch(err => console.log('SW Update Error: ', err));

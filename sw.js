@@ -3,7 +3,7 @@
  * Refreshes the local app shell when a new deployment is available.
  * Keeps the latest successful same-origin GET responses for offline use.
  */
-const CACHE_NAME = 'aljoud-cafe-shell-v4';
+const CACHE_NAME = 'aljoud-cafe-shell-v5';
 const APP_SHELL = [
     './',
     './index.html',
@@ -34,22 +34,6 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Handles remote push payloads once a secure push sender is connected.
-self.addEventListener('push', (event) => {
-    let payload = {};
-    try { payload = event.data ? event.data.json() : {}; }
-    catch (error) { payload = { body: event.data ? event.data.text() : '' }; }
-    const title = payload.title || 'الجود كافيه ☕';
-    const options = {
-        body: payload.body || 'عندنا شيء حلو نحب نشاركه معك ❤️',
-        icon: payload.icon || './logo.png',
-        badge: payload.badge || './logo.png',
-        tag: payload.tag || 'aljoud-general',
-        data: { url: payload.url || './index.html' }
-    };
-    event.waitUntil(self.registration.showNotification(title, options));
-});
-
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     const target = new URL(event.notification.data?.url || './index.html', self.location.origin);
@@ -60,6 +44,35 @@ self.addEventListener('notificationclick', (event) => {
         return self.clients.openWindow(target.href);
     }));
 });
+// Firebase Messaging background support. Notification payloads are displayed by the SDK.
+importScripts('https://www.gstatic.com/firebasejs/13.0.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/13.0.0/firebase-messaging-compat.js');
+
+firebase.initializeApp({
+    apiKey: "AIzaSyAMdmUshORZe4SO6kXHhH2ZPa0bs4_ueXNU",
+    authDomain: "aljoud-coffee.firebaseapp.com",
+    projectId: "aljoud-coffee",
+    storageBucket: "aljoud-coffee.firebasestorage.app",
+    messagingSenderId: "501147188970",
+    appId: "1:501147188970:web:51712e4471851b8c2da193",
+    measurementId: "G-DVT5KK5TFL"
+});
+
+const aljoudMessaging = firebase.messaging();
+aljoudMessaging.onBackgroundMessage((payload) => {
+    // FCM automatically displays notification payloads in the background.
+    // Show a notification here only for data-only messages.
+    if (payload.notification) return;
+    const data = payload.data || {};
+    return self.registration.showNotification(data.title || 'الجود كافيه ☕', {
+        body: data.body || 'عندنا شيء حلو نحب نشاركه معك ❤️',
+        icon: data.icon || './logo.png',
+        badge: data.badge || './logo.png',
+        tag: data.tag || 'aljoud-general',
+        data: { url: data.url || './index.html' }
+    });
+});
+
 self.addEventListener('fetch', (event) => {
     const request = event.request;
     const requestUrl = new URL(request.url);

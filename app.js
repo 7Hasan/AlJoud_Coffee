@@ -21,6 +21,8 @@ class CafeApp {
         this.proximityWatchId = null;
         this.proximityInside = false;
         this.notificationRegistration = null;
+        this.messaging = null;
+        this.fcmToken = localStorage.getItem('aljoud_fcm_token') || null;
         this.init();
     }
 
@@ -67,11 +69,53 @@ class CafeApp {
     setupNotifications() {
         document.getElementById('enableNotificationsBtn')?.addEventListener('click', () => this.enableNotifications());
         document.getElementById('enableNearbyBtn')?.addEventListener('click', () => this.enableNearbyAlerts());
+        document.getElementById('copyFcmTokenBtn')?.addEventListener('click', () => this.copyFcmToken());
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') this.stopProximityMonitoring();
             else if (localStorage.getItem('aljoud_nearby_enabled') === 'true') this.startProximityMonitoring();
         });
         this.updateNotificationStatus();
+        if (Notification.permission === 'granted' && this.fcmToken) {
+            this.showFcmTokenControl();
+        }
+    }
+
+    async initializeFirebaseMessaging() {
+        if (this.messaging) return this.messaging;
+        if (!window.firebase || !window.ALJOUD_FIREBASE_CONFIG || !window.ALJOUD_VAPID_PUBLIC_KEY) {
+            throw new Error('Firebase web configuration is missing.');
+        }
+        if (!firebase.apps.length) firebase.initializeApp(window.ALJOUD_FIREBASE_CONFIG);
+        const supported = await firebase.messaging.isSupported();
+        if (!supported) throw new Error('This browser does not support Firebase Web Messaging.');
+        this.messaging = firebase.messaging();
+        this.messaging.onMessage(async (payload) => {
+            const notification = payload.notification || payload.data || {};
+            const registration = this.notificationRegistration || await navigator.serviceWorker.ready;
+            await registration.showNotification(notification.title || 'الجود كافيه ☕', {
+                body: notification.body || 'عندنا شيء حلو نحب نشاركه معك ❤️',
+                icon: notification.icon || './logo.png',
+                badge: './logo.png',
+                tag: notification.tag || 'aljoud-foreground',
+                data: { url: notification.url || './index.html' }
+            });
+        });
+        return this.messaging;
+    }
+
+    showFcmTokenControl() {
+        const button = document.getElementById('copyFcmTokenBtn');
+        if (button) button.classList.remove('hidden');
+    }
+
+    async copyFcmToken() {
+        if (!this.fcmToken) return;
+        try {
+            await navigator.clipboard.writeText(this.fcmToken);
+            this.showAlert('تم نسخ رمز الجهاز', 'هذا الرمز مخصص لاختبار إرسال إشعار لهذا الجهاز. لا تنشره أو تشاركه علنًا.', 'success');
+        } catch (error) {
+            this.showAlert('تعذر النسخ', 'انسخ الرمز من أدوات المطور عند الحاجة، ولا تنشره علنًا.', 'error');
+        }
     }
 
     updateNotificationStatus() {
@@ -86,7 +130,7 @@ class CafeApp {
             return;
         }
         if (Notification.permission === 'granted') {
-            status.textContent = 'إشعارات الجود مسموحة على هذا الجهاز.';
+            status.textContent = this.fcmToken ? 'إشعارات الجود مفعّلة على هذا الجهاز.' : 'الإذن مسموح؛ أكمل ربط هذا الجهاز بإشعارات الجود.';
             if (enableButton) enableButton.textContent = 'الإشعارات مسموحة ✓';
         } else if (Notification.permission === 'denied') {
             status.textContent = 'الإشعارات محظورة من إعدادات المتصفح. يمكنك تغيير الإذن من إعدادات الموقع.';
@@ -105,24 +149,39 @@ class CafeApp {
             return;
         }
         try {
-            const permission = Notification.permission === 'default' ? await Notification.requestPermission() : Notification.permission;
+            const permission = Notification.permission === 'default'
+                ? await Notification.requestPermission()
+                : Notification.permission;
             if (permission !== 'granted') {
                 this.updateNotificationStatus();
                 this.showAlert('لم يتم تفعيل الإشعارات', 'يمكنك السماح بها من إعدادات المتصفح ثم المحاولة مرة أخرى.', 'info');
                 return;
             }
+
             const registration = this.notificationRegistration || await navigator.serviceWorker.ready;
             this.notificationRegistration = registration;
+            const messaging = await this.initializeFirebaseMessaging();
+            const token = await messaging.getToken({
+                vapidKey: window.ALJOUD_VAPID_PUBLIC_KEY,
+                serviceWorkerRegistration: registration
+            });
+            if (!token) throw new Error('Firebase did not return a messaging token.');
+
+            // Keep the device token locally for this browser. A secure backend
+            // is still required before this device can join remote campaigns.
+            this.fcmToken = token;
+            localStorage.setItem('aljoud_fcm_token', token);
+            this.showFcmTokenControl();
             await registration.showNotification('يا هلا بك في الجود ☕', {
-                body: 'من اليوم نخلي أخبارنا الحلوة توصلك بكل ود ❤️',
+                body: 'تم تفعيل استقبال إشعارات الجود على هذا الجهاز ❤️',
                 icon: './logo.png', badge: './logo.png', tag: 'aljoud-welcome',
                 data: { url: './index.html' }
             });
             this.updateNotificationStatus();
-            this.showAlert('تم السماح بإشعارات الجود ❤️', 'وصلتك رسالة ترحيبية تجريبية على هذا الجهاز. الإشعارات العامة عن بُعد تحتاج ربط خدمة إرسال آمنة في المرحلة التالية.', 'success');
+            this.showAlert('تم تفعيل استقبال الإشعارات ❤️', 'تم إنشاء اشتراك Firebase لهذا الجهاز. إرسال الحملات العامة يحتاج الخطوة التالية: خادم آمن لحفظ الاشتراكات وإرسال الرسائل.', 'success');
         } catch (error) {
-            console.error('Notification setup failed:', error);
-            this.showAlert('تعذر تفعيل الإشعارات', 'تأكد من فتح الموقع عبر HTTPS ثم أعد المحاولة.', 'error');
+            console.error('Firebase Messaging setup failed:', error);
+            this.showAlert('تعذر إكمال ربط الإشعارات', 'تحقق من HTTPS ودعم المتصفح، ومن إعدادات Firebase وVAPID، ثم أعد المحاولة.', 'error');
         }
     }
 

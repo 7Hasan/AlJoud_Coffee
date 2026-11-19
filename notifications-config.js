@@ -1,7 +1,8 @@
 /*
  * AlJoud notification settings.
- * Add the cafe's verified Google Maps coordinates after receiving its map pin.
- * Example: window.ALJOUD_CAFE_LOCATION = { lat: 15.123456, lng: 48.123456 };
- * Leave null until the exact cafe location is confirmed.
+ * Cafe coordinates supplied by the user.
  */
-window.ALJOUD_CAFE_LOCATION = null;
+window.ALJOUD_CAFE_LOCATION = {
+  lat: 14.475609006112014,
+  lng: 49.04512577450814
+};

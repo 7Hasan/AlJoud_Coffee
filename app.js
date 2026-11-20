@@ -89,7 +89,7 @@ class CafeApp {
         const originalFetch = window.fetch.bind(window);
         window.fetch = async (...args) => {
             const requestUrl = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
-            const isFirebaseRequest = /firebaseinstallations\\.googleapis\\.com|fcmregistrations\\.googleapis\\.com|googleapis\\.com\\/v1\\/projects/i.test(requestUrl);
+            const isFirebaseRequest = requestUrl.includes('firebaseinstallations.googleapis.com') || requestUrl.includes('fcmregistrations.googleapis.com') || requestUrl.includes('googleapis.com/v1/projects');
             try {
                 const response = await originalFetch(...args);
                 if (isFirebaseRequest && !response.ok) {

@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /notificationSubscriptions/{userId} {
+      // Each anonymous user can access only their own device subscription.
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly([
+          'token', 'enabled', 'source', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'token', 'enabled', 'source', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.token is string
+        && request.resource.data.token.size() > 20
+        && request.resource.data.enabled == true
+        && request.resource.data.source == 'web'
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly([
+          'token', 'enabled', 'source', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'token', 'enabled', 'source', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.token is string
+        && request.resource.data.token.size() > 20
+        && request.resource.data.enabled == true
+        && request.resource.data.source == 'web'
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt is timestamp;
+
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Deny all other client access unless a future feature adds explicit rules.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

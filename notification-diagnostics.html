@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171513">
+  <title>تشخيص إشعارات الجود</title>
+  <script src="./notifications-config.js"></script>
+  <style>
+    :root{color-scheme:dark;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#111;color:#f7f3ec}
+    *{box-sizing:border-box}body{margin:0;padding:22px 14px;background:linear-gradient(145deg,#171513,#292016);min-height:100vh}
+    main{max-width:720px;margin:auto}.panel{background:#211e1a;border:1px solid #57432b;border-radius:18px;padding:20px;margin:14px 0}
+    h1{font-size:22px;margin:0 0 8px;color:#f4bd63}p{color:#c9c1b6;line-height:1.8;font-size:14px}
+    button{border:0;border-radius:12px;padding:13px 18px;font-weight:700;font-size:15px;background:#d99a38;color:#17120b;cursor:pointer;width:100%}
+    button:disabled{opacity:.55;cursor:wait}pre{white-space:pre-wrap;overflow-wrap:anywhere;direction:ltr;text-align:left;background:#12110f;border:1px solid #39332b;border-radius:12px;padding:14px;font-size:12px;line-height:1.7;min-height:90px;color:#e9dfcf}
+    .muted{font-size:12px;color:#a99f91}.ok{color:#9fe0a8}.bad{color:#ffb0a6}
+  </style>
+</head>
+<body>
+<main>
+  <section class="panel">
+    <h1>تشخيص إشعارات الجود ☕</h1>
+    <p>هذه صفحة فحص مؤقتة تساعدنا نعرف هل الهاتف يستطيع الوصول إلى Firebase Installations، وهل طلب المتصفح يتعثر عند CORS أو عند الاتصال. لا تطلب إذن الإشعارات ولا تنشئ رمز FCM ولا تحفظ بيانات.</p>
+    <button id="run" type="button">بدء الفحص</button>
+    <p class="muted">شغّل الفحص من الهاتف الذي تظهر عليه المشكلة، بعد فتح الصفحة وانتظار تحميلها بالكامل.</p>
+  </section>
+  <section class="panel">
+    <strong>نتيجة الفحص</strong>
+    <pre id="output">لم يبدأ الفحص بعد.</pre>
+    <button id="copy" type="button" disabled>نسخ تقرير الفحص</button>
+  </section>
+  <p class="muted">ملاحظة: مفتاح Firebase المستخدم هنا هو مفتاح الويب العام الموجود أصلًا في إعدادات الموقع. لن يظهر المفتاح أو أي رمز جهاز في التقرير.</p>
+</main>
+<script>
+(() => {
+  const runButton = document.getElementById('run');
+  const copyButton = document.getElementById('copy');
+  const output = document.getElementById('output');
+  let reportText = '';
+
+  const timeoutFetch = async (url, options, timeoutMs = 15000) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const started = performance.now();
+    try {
+      const response = await fetch(url, { ...options, signal: controller.signal, cache: 'no-store' });
+      const elapsed = Math.round(performance.now() - started);
+      let body = '';
+      try { body = (await response.text()).slice(0, 350).replace(/[\r\n\t]+/g, ' '); } catch (_) {}
+      return { ok: response.ok, status: response.status, statusText: response.statusText, elapsedMs: elapsed, body };
+    } catch (error) {
+      return { ok: false, errorName: error && error.name || 'Error', errorMessage: error && error.message || String(error), elapsedMs: Math.round(performance.now() - started) };
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+
+  runButton.addEventListener('click', async () => {
+    runButton.disabled = true;
+    copyButton.disabled = true;
+    output.textContent = 'جارٍ تنفيذ الفحوصات...';
+    const config = window.ALJOUD_FIREBASE_CONFIG || {};
+    const endpoint = 'https://firebaseinstallations.googleapis.com/v1/projects/' +
+      encodeURIComponent(config.projectId || 'aljoud-coffee') + '/installations';
+    const report = {
+      checkedAt: new Date().toISOString(),
+      pageOrigin: location.origin,
+      pagePath: location.pathname,
+      online: navigator.onLine,
+      secureContext: window.isSecureContext,
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      serviceWorkerSupported: 'serviceWorker' in navigator,
+      notificationSupported: 'Notification' in window,
+      notificationPermission: 'Notification' in window ? Notification.permission : 'not-supported',
+      firebaseConfigLoaded: Boolean(config.apiKey && config.projectId && config.appId),
+      firebaseProjectId: config.projectId || 'missing',
+      tests: {}
+    };
+
+    // A plain GET checks whether a cross-origin response from this host is readable.
+    report.tests.installationsGet = await timeoutFetch(endpoint, { method: 'GET', mode: 'cors' });
+
+    // An intentionally invalid empty POST exercises the same CORS preflight pattern
+    // (JSON + x-goog-api-key) without creating an installation or an FCM token.
+    if (config.apiKey) {
+      report.tests.installationsPostPreflight = await timeoutFetch(endpoint, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': config.apiKey
+        },
+        body: '{}'
+      });
+    } else {
+      report.tests.installationsPostPreflight = { skipped: true, reason: 'Firebase API key not loaded' };
+    }
+
+    const get = report.tests.installationsGet;
+    const post = report.tests.installationsPostPreflight;
+    report.interpretation = post && typeof post.status === 'number'
+      ? 'وصل طلب POST إلى Firebase وتجاوز CORS preflight؛ راجع حالة HTTP وتفاصيل الرد أدناه.'
+      : 'لم نحصل على استجابة HTTP لطلب POST. قد يكون السبب CORS preflight أو اتصالًا/حظرًا على مستوى المتصفح؛ التقرير لا يثبت أيًّا منهما وحده.';
+    if (get && typeof get.status === 'number') {
+      report.getInterpretation = 'استجابة GET وصلت من الخادم. هذا يثبت إمكانية قراءة استجابة من النطاق، لكنه لا يثبت نجاح طلب POST.';
+    } else {
+      report.getInterpretation = 'لم تصل استجابة GET قابلة للقراءة من المتصفح.';
+    }
+
+    reportText = JSON.stringify(report, null, 2);
+    output.textContent = reportText;
+    copyButton.disabled = false;
+    runButton.disabled = false;
+  });
+
+  copyButton.addEventListener('click', async () => {
+    if (!reportText) return;
+    try {
+      await navigator.clipboard.writeText(reportText);
+      copyButton.textContent = 'تم نسخ التقرير ✓';
+    } catch (_) {
+      output.focus?.();
+      copyButton.textContent = 'حدد التقرير وانسخه يدويًا';
+    }
+  });
+})();
+</script>
+</body>
+</html>

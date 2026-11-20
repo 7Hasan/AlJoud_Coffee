@@ -103,6 +103,36 @@ class CafeApp {
         return this.messaging;
     }
 
+    async saveFcmSubscription(token) {
+        if (!window.firebase || !firebase.auth || !firebase.firestore) {
+            throw new Error('Firebase Auth or Firestore SDK is not loaded.');
+        }
+
+        const auth = firebase.auth();
+        if (!auth.currentUser) {
+            await auth.signInAnonymously();
+        }
+        const user = auth.currentUser;
+        if (!user) throw new Error('Anonymous Firebase sign-in did not return a user.');
+
+        const db = firebase.firestore();
+        const subscriptionRef = db.collection('notificationSubscriptions').doc(user.uid);
+        const existing = await subscriptionRef.get();
+        const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+
+        await subscriptionRef.set({
+            token,
+            enabled: true,
+            source: 'web',
+            createdAt: existing.exists && existing.data().createdAt
+                ? existing.data().createdAt
+                : timestamp,
+            updatedAt: timestamp
+        }, { merge: true });
+
+        return user.uid;
+    }
+
     showFcmTokenControl() {
         const button = document.getElementById('copyFcmTokenBtn');
         if (button) button.classList.remove('hidden');
@@ -172,13 +202,28 @@ class CafeApp {
             this.fcmToken = token;
             localStorage.setItem('aljoud_fcm_token', token);
             this.showFcmTokenControl();
+
+            // Store this device's subscription under its anonymous Firebase UID.
+            try {
+                await this.saveFcmSubscription(token);
+            } catch (saveError) {
+                console.error('Could not save FCM subscription to Firestore:', saveError);
+                this.updateNotificationStatus();
+                this.showAlert(
+                    'الإشعارات تعمل لكن لم يُحفظ الاشتراك',
+                    'تم إنشاء رمز الجهاز، لكن تعذر حفظه في قاعدة البيانات. تحقق من تفعيل Anonymous Authentication وقواعد Firestore ثم أعد المحاولة.',
+                    'error'
+                );
+                return;
+            }
+
             await registration.showNotification('يا هلا بك في الجود ☕', {
                 body: 'تم تفعيل استقبال إشعارات الجود على هذا الجهاز ❤️',
                 icon: './logo.png', badge: './logo.png', tag: 'aljoud-welcome',
                 data: { url: './index.html' }
             });
             this.updateNotificationStatus();
-            this.showAlert('تم تفعيل استقبال الإشعارات ❤️', 'تم إنشاء اشتراك Firebase لهذا الجهاز. إرسال الحملات العامة يحتاج الخطوة التالية: خادم آمن لحفظ الاشتراكات وإرسال الرسائل.', 'success');
+            this.showAlert('تم تفعيل إشعارات الجود وحفظ الاشتراك ❤️', 'تم حفظ اشتراك هذا الجهاز بأمان في قاعدة بيانات الجود. يمكنك إغلاق الموقع؛ أما إرسال الحملات العامة فسنجهز له خادمًا آمنًا في الخطوة التالية.', 'success');
         } catch (error) {
             console.error('Firebase Messaging setup failed:', error);
             this.showAlert('تعذر إكمال ربط الإشعارات', 'تحقق من HTTPS ودعم المتصفح، ومن إعدادات Firebase وVAPID، ثم أعد المحاولة.', 'error');

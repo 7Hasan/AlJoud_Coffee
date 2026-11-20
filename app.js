@@ -80,6 +80,33 @@ class CafeApp {
         }
     }
 
+    installFirebaseFetchDiagnostics() {
+        // Capture the exact Firebase endpoint that fails during Android FCM registration.
+        // This is diagnostic only: requests and responses are not modified.
+        if (this.firebaseFetchDiagnosticsInstalled || typeof window.fetch !== 'function') return;
+        this.firebaseFetchDiagnosticsInstalled = true;
+        this.lastFirebaseRequestFailure = null;
+        const originalFetch = window.fetch.bind(window);
+        window.fetch = async (...args) => {
+            const requestUrl = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+            const isFirebaseRequest = /firebaseinstallations\\.googleapis\\.com|fcmregistrations\\.googleapis\\.com|googleapis\\.com\\/v1\\/projects/i.test(requestUrl);
+            try {
+                const response = await originalFetch(...args);
+                if (isFirebaseRequest && !response.ok) {
+                    this.lastFirebaseRequestFailure = `HTTP ${response.status} — ${requestUrl}`;
+                    console.error('[AlJoud FCM request failed]', this.lastFirebaseRequestFailure);
+                }
+                return response;
+            } catch (error) {
+                if (isFirebaseRequest) {
+                    this.lastFirebaseRequestFailure = `Network failure — ${requestUrl}`;
+                    console.error('[AlJoud FCM network failure]', this.lastFirebaseRequestFailure, error);
+                }
+                throw error;
+            }
+        };
+    }
+
     async initializeFirebaseMessaging() {
         if (this.messaging) return this.messaging;
         if (!window.firebase || !window.ALJOUD_FIREBASE_CONFIG || !window.ALJOUD_VAPID_PUBLIC_KEY) {
@@ -195,6 +222,7 @@ class CafeApp {
             diagnosticStage = 'تهيئة Firebase Messaging والتحقق من دعم المتصفح';
             const messaging = await this.initializeFirebaseMessaging();
             diagnosticStage = 'طلب رمز الإشعارات من Firebase (FCM)';
+            this.installFirebaseFetchDiagnostics();
             const token = await messaging.getToken({
                 vapidKey: window.ALJOUD_VAPID_PUBLIC_KEY,
                 serviceWorkerRegistration: registration
@@ -238,7 +266,8 @@ class CafeApp {
             });
 
             const code = error?.code || '';
-            const detail = error?.message || String(error);
+            const requestFailure = this.lastFirebaseRequestFailure ? `\\nالطلب المتعثر: ${this.lastFirebaseRequestFailure}` : '';
+            const detail = (error?.message || String(error)) + requestFailure;
             let guidance = 'أرسل لنا رمز الخطأ والتفاصيل الظاهرة أدناه حتى نحدد السبب بدقة.';
             if (code.includes('unsupported-browser')) {
                 guidance = 'افتح الموقع في Google Chrome أو متصفح Android يدعم Web Push، وليس داخل متصفح واتساب أو إنستغرام.';

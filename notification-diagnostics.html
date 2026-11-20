@@ -46,7 +46,8 @@
       const response = await fetch(url, { ...options, signal: controller.signal, cache: 'no-store' });
       const elapsed = Math.round(performance.now() - started);
       let body = '';
-      try { body = (await response.text()).slice(0, 350).replace(/[\r\n\t]+/g, ' '); } catch (_) {}
+      try { body = (await response.text()).slice(0, 350).replace(/[\r
+\t]+/g, ' '); } catch (_) {}
       return { ok: response.ok, status: response.status, statusText: response.statusText, responseType: response.type, elapsedMs: elapsed, body };
     } catch (error) {
       return { ok: false, errorName: error && error.name || 'Error', errorMessage: error && error.message || String(error), elapsedMs: Math.round(performance.now() - started) };
@@ -79,7 +80,9 @@
     };
 
     // A plain GET checks whether a cross-origin response from this host is readable.
-    report.tests.controlHostReachability = await timeoutFetch('https://www.gstatic.com/generate_204', { method: 'GET', mode: 'no-cors' });\n    report.tests.installationsOpaqueReachability = await timeoutFetch(endpoint, { method: 'GET', mode: 'no-cors' });\n    report.tests.installationsGet = await timeoutFetch(endpoint, { method: 'GET', mode: 'cors' });
+    report.tests.controlHostReachability = await timeoutFetch('https://www.gstatic.com/generate_204', { method: 'GET', mode: 'no-cors' });
+    report.tests.installationsOpaqueReachability = await timeoutFetch(endpoint, { method: 'GET', mode: 'no-cors' });
+    report.tests.installationsGet = await timeoutFetch(endpoint, { method: 'GET', mode: 'cors' });
 
     // An intentionally invalid empty POST exercises the same CORS preflight pattern
     // (JSON + x-goog-api-key) without creating an installation or an FCM token.

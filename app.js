@@ -178,6 +178,7 @@ class CafeApp {
             this.showAlert('الإشعارات غير مدعومة', 'افتح الموقع من متصفح حديث يدعم إشعارات الويب.', 'info');
             return;
         }
+        let diagnosticStage = 'التحقق من إذن الإشعارات';
         try {
             const permission = Notification.permission === 'default'
                 ? await Notification.requestPermission()
@@ -188,9 +189,12 @@ class CafeApp {
                 return;
             }
 
+            diagnosticStage = 'انتظار Service Worker';
             const registration = this.notificationRegistration || await navigator.serviceWorker.ready;
             this.notificationRegistration = registration;
+            diagnosticStage = 'تهيئة Firebase Messaging والتحقق من دعم المتصفح';
             const messaging = await this.initializeFirebaseMessaging();
+            diagnosticStage = 'طلب رمز الإشعارات من Firebase (FCM)';
             const token = await messaging.getToken({
                 vapidKey: window.ALJOUD_VAPID_PUBLIC_KEY,
                 serviceWorkerRegistration: registration
@@ -199,12 +203,14 @@ class CafeApp {
 
             // Keep the device token locally for this browser. A secure backend
             // is still required before this device can join remote campaigns.
+            diagnosticStage = 'حفظ رمز الجهاز محليًا';
             this.fcmToken = token;
             localStorage.setItem('aljoud_fcm_token', token);
             this.showFcmTokenControl();
 
             // Store this device's subscription under its anonymous Firebase UID.
             try {
+                diagnosticStage = 'تسجيل الدخول المجهول وحفظ الاشتراك في Firestore';
                 await this.saveFcmSubscription(token);
             } catch (saveError) {
                 console.error('Could not save FCM subscription to Firestore:', saveError);
@@ -249,7 +255,7 @@ class CafeApp {
             const safeDetail = String(detail).slice(0, 240);
             this.showAlert(
                 'تعذر إكمال ربط الإشعارات',
-                `رمز الخطأ: ${code || 'غير محدد'}\nالتفاصيل: ${safeDetail}\n\n${guidance}`,
+                `المرحلة: ${diagnosticStage}\nرمز الخطأ: ${code || 'غير محدد'}\nالتفاصيل: ${safeDetail}\n\n${guidance}`,
                 'error'
             );
         }

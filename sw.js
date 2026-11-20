@@ -3,7 +3,7 @@
  * Refreshes the local app shell when a new deployment is available.
  * Keeps the latest successful same-origin GET responses for offline use.
  */
-const CACHE_NAME = 'aljoud-cafe-shell-v5';
+const CACHE_NAME = 'aljoud-cafe-shell-v6';
 const APP_SHELL = [
     './',
     './index.html',

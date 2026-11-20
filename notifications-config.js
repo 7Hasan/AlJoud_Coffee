@@ -9,7 +9,7 @@ window.ALJOUD_CAFE_LOCATION = {
 };
 
 window.ALJOUD_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAMdmUshORZe4SO6kXHhH2ZPa0bs4_ueXNU",
+  apiKey: "AIzaSyAMdmUshORZe4SO6kXhH2ZPa0bs4_ueXNU",
   authDomain: "aljoud-coffee.firebaseapp.com",
   projectId: "aljoud-coffee",
   storageBucket: "aljoud-coffee.firebasestorage.app",

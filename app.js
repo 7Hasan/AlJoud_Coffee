@@ -225,8 +225,33 @@ class CafeApp {
             this.updateNotificationStatus();
             this.showAlert('تم تفعيل إشعارات الجود وحفظ الاشتراك ❤️', 'تم حفظ اشتراك هذا الجهاز بأمان في قاعدة بيانات الجود. يمكنك إغلاق الموقع؛ أما إرسال الحملات العامة فسنجهز له خادمًا آمنًا في الخطوة التالية.', 'success');
         } catch (error) {
-            console.error('Firebase Messaging setup failed:', error);
-            this.showAlert('تعذر إكمال ربط الإشعارات', 'تحقق من HTTPS ودعم المتصفح، ومن إعدادات Firebase وVAPID، ثم أعد المحاولة.', 'error');
+            console.error('Firebase Messaging setup failed:', {
+                code: error?.code || 'unknown',
+                message: error?.message || String(error),
+                name: error?.name || 'Error'
+            });
+
+            const code = error?.code || '';
+            const detail = error?.message || String(error);
+            let guidance = 'أرسل لنا رمز الخطأ والتفاصيل الظاهرة أدناه حتى نحدد السبب بدقة.';
+            if (code.includes('unsupported-browser')) {
+                guidance = 'افتح الموقع في Google Chrome أو متصفح Android يدعم Web Push، وليس داخل متصفح واتساب أو إنستغرام.';
+            } else if (code.includes('permission')) {
+                guidance = 'تحقق من إذن الإشعارات للموقع من إعدادات Chrome في الجوال.';
+            } else if (code.includes('service-worker')) {
+                guidance = 'تعذر تشغيل ملف خدمة الإشعارات. سنحتاج فحص تسجيل Service Worker لهذا المتصفح.';
+            } else if (code.includes('token-subscribe') || code.includes('installations')) {
+                guidance = 'تعذر تسجيل الجهاز لدى Firebase. تحقق من اتصال الإنترنت وإعدادات Firebase لهذا النطاق.';
+            } else if (code.includes('api-key-not-valid') || detail.toLowerCase().includes('api key not valid')) {
+                guidance = 'رفض Firebase مفتاح API لهذا الطلب. سنراجع النطاق وقيود مفتاح API بدل تغييره عشوائيًا.';
+            }
+
+            const safeDetail = String(detail).slice(0, 240);
+            this.showAlert(
+                'تعذر إكمال ربط الإشعارات',
+                `رمز الخطأ: ${code || 'غير محدد'}\nالتفاصيل: ${safeDetail}\n\n${guidance}`,
+                'error'
+            );
         }
     }
 

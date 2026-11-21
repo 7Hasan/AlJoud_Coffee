@@ -132,3 +132,16 @@ input:focus-visible {
 /* إشعارات الجود */
 #enableNotificationsBtn:focus-visible,
 #enableNearbyBtn:focus-visible { outline: 2px solid #d97706; outline-offset: 3px; }
+
+
+/* AlJoud permission flow and non-intrusive notification reminder */
+#permissionFlowModal {
+    overscroll-behavior: contain;
+}
+#permissionFlowModal > div {
+    animation: scaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+#notificationReminder {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    animation: scaleUp 0.22s ease-out forwards;
+}

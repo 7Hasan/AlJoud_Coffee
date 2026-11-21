@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#171513">
+  <title>إدارة الإشعارات | الجود كافيه</title>
+  <link rel="icon" href="../logo.png">
+  <link rel="stylesheet" href="./admin.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="../"><img src="../logo.png" alt=""><span><b>الجود كافيه</b><small>مركز إدارة الإشعارات</small></span></a>
+      <div class="top-actions"><span id="connection" class="status">غير متصل</span><button id="logoutBtn" class="btn ghost hidden">تسجيل الخروج</button></div>
+    </header>
+
+    <section id="loginView" class="auth-layout">
+      <div class="intro">
+        <span class="eyebrow">ALJOUD COFFEE · NOTIFICATIONS</span>
+        <h1>رسالتك توصل<br><em>لعملائك.</em></h1>
+        <p>مساحة آمنة لفريق الجود لإدارة حملات الإشعارات ومتابعة نتائج الإرسال.</p>
+        <div class="feature-line"><i>✓</i> حساب مستقل لكل موظف</div>
+        <div class="feature-line"><i>✓</i> صلاحيات مدير وموظف</div>
+        <div class="feature-line"><i>✓</i> لا توجد مفاتيح سرية داخل الموقع</div>
+      </div>
+      <div class="panel auth-panel">
+        <div id="loginFormWrap">
+          <span class="eyebrow">WELCOME BACK</span><h2>تسجيل الدخول</h2>
+          <p class="muted">أدخل بيانات حسابك للمتابعة.</p>
+          <form id="loginForm">
+            <label>اسم المستخدم أو البريد<input name="username" autocomplete="username" required></label>
+            <label>كلمة المرور<input name="password" type="password" autocomplete="current-password" required></label>
+            <button class="btn primary full" type="submit">دخول إلى لوحة الإدارة</button>
+          </form>
+          <button id="showBootstrap" class="text-button" type="button">إعداد حساب المدير لأول مرة</button>
+        </div>
+        <div id="bootstrapWrap" class="hidden">
+          <span class="eyebrow">FIRST-TIME SETUP</span><h2>إنشاء حساب المدير</h2>
+          <p class="muted">يُستخدم مفتاح التهيئة الموجود في أسرار Cloudflare لمرة واحدة فقط.</p>
+          <form id="bootstrapForm">
+            <label>اسم المدير<input name="name" required maxlength="80"></label>
+            <label>اسم المستخدم<input name="username" required minlength="3" maxlength="40" autocomplete="username"></label>
+            <label>البريد الإلكتروني (اختياري)<input name="email" type="email" maxlength="120"></label>
+            <label>كلمة المرور<input name="password" type="password" required minlength="12" autocomplete="new-password"></label>
+            <label>مفتاح التهيئة<input name="bootstrapKey" type="password" required autocomplete="off"></label>
+            <button class="btn primary full" type="submit">إنشاء حساب المدير</button>
+          </form>
+          <button id="showLogin" class="text-button" type="button">العودة لتسجيل الدخول</button>
+        </div>
+        <p id="authMessage" class="message" role="status"></p>
+      </div>
+    </section>
+
+    <section id="dashboardView" class="hidden">
+      <div class="welcome-row"><div><span class="eyebrow">CONTROL CENTER</span><h1>مرحباً، <span id="userName">—</span></h1><p class="muted">إدارة رسائل الجود كافيه من مكان واحد.</p></div><span id="rolePill" class="role-pill">—</span></div>
+      <div class="stats">
+        <article class="stat-card"><span>الاشتراكات المسجلة</span><strong id="subCount">—</strong><small>أجهزة اشتركت في الإشعارات</small></article>
+        <article class="stat-card"><span>إشعارات أُرسلت</span><strong id="sentCount">—</strong><small>إجمالي محاولات الإرسال الناجحة</small></article>
+        <article class="stat-card"><span>إخفاقات الإرسال</span><strong id="failedCount">—</strong><small>تحتاج إلى مراجعة</small></article>
+      </div>
+
+      <div class="content-grid">
+        <section class="panel compose-panel">
+          <div class="section-heading"><div><span class="eyebrow">NEW CAMPAIGN</span><h2>إرسال إشعار جديد</h2></div><span class="live-dot">جاهز للإرسال</span></div>
+          <form id="sendForm">
+            <label>عنوان الإشعار <span class="counter"><b id="titleCount">0</b>/100</span><input name="title" maxlength="100" placeholder="مثلاً: عرض جديد من الجود ☕" required></label>
+            <label>نص الإشعار <span class="counter"><b id="bodyCount">0</b>/500</span><textarea name="body" maxlength="500" rows="4" placeholder="اكتب رسالة قصيرة وواضحة لعملائك..." required></textarea></label>
+            <label>الرابط عند الضغط<input name="url" value="/AlJoud_Coffee/" placeholder="/AlJoud_Coffee/"></label>
+            <div class="hint">سيصل الإشعار إلى جميع الاشتراكات النشطة. راجع النص والرابط قبل الإرسال.</div>
+            <button class="btn primary full" type="submit">إرسال إلى المشتركين <span>←</span></button>
+          </form>
+          <p id="sendMessage" class="message" role="status"></p>
+        </section>
+
+        <section class="panel history-panel">
+          <div class="section-heading"><div><span class="eyebrow">ACTIVITY</span><h2>آخر عمليات الإرسال</h2></div><button id="refreshBtn" class="btn ghost small">تحديث</button></div>
+          <div id="historyList" class="history-list"><p class="muted">جارٍ تحميل السجل...</p></div>
+          <p class="hint">يعرض السجل نتائج الخادم، وليس ضماناً بأن كل جهاز عرض الإشعار للمستخدم.</p>
+        </section>
+      </div>
+
+      <section id="usersPanel" class="panel users-panel hidden">
+        <div class="section-heading"><div><span class="eyebrow">TEAM ACCESS</span><h2>إدارة حسابات الموظفين</h2><p class="muted">أنشئ حساباً مستقلاً لكل موظف، ويمكنك تعطيله عند الحاجة.</p></div></div>
+        <form id="userForm" class="user-form">
+          <label>اسم الموظف<input name="name" required maxlength="80"></label>
+          <label>اسم المستخدم<input name="username" required minlength="3" maxlength="40"></label>
+          <label>البريد الإلكتروني<input name="email" type="email" maxlength="120"></label>
+          <label>كلمة مرور مؤقتة<input name="password" type="password" required minlength="12" autocomplete="new-password"></label>
+          <button class="btn primary" type="submit">إنشاء حساب موظف</button>
+        </form>
+        <p class="hint">أرسل بيانات الدخول للموظف عبر قناة خاصة، واطلب منه تغيير كلمة المرور بعد أول دخول.</p>
+        <div id="usersList" class="users-list"><p class="muted">جارٍ تحميل الحسابات...</p></div>
+        <p id="usersMessage" class="message" role="status"></p>
+      </section>
+    </section>
+    <footer>الجود كافيه <span>•</span> لوحة داخلية لإدارة الإشعارات</footer>
+  </main>
+  <script src="./admin.js"></script>
+</body>
+</html>

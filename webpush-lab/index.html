@@ -26,7 +26,8 @@
     <input id="vapidKey" dir="ltr" autocomplete="off" spellcheck="false" placeholder="الصق المفتاح العام الذي سنولّده محليًا" style="width:100%;padding:12px;border:1px solid #d8c8ad;border-radius:10px;font:12px monospace">
     <div id="status" role="status" aria-live="polite">بعد توليد مفتاح VAPID محليًا، الصق المفتاح العام هنا. لا تضع المفتاح الخاص في الموقع أبدًا.</div>
     <button id="run">1) تسجيل خدمة الاختبار وإنشاء اشتراك</button>
-    <button id="copy" class="secondary" disabled>نسخ نتيجة الاشتراك</button>
+    <button id="copy" class="secondary" disabled>نسخ نتيجة الفحص</button>
+    <button id="saveSubscription" class="secondary" disabled>تنزيل ملف الاشتراك للإرسال المحلي</button>
   </section>
   <section class="card">
     <strong>تفاصيل الاختبار</strong>
@@ -45,6 +46,8 @@
   const status = document.getElementById('status');
   const output = document.getElementById('output');
   const vapidInput = document.getElementById('vapidKey');
+  const saveSubscriptionButton = document.getElementById('saveSubscription');
+  let subscriptionJson = '';
   let resultText = '';
 
   const setStatus = (message, kind) => {
@@ -60,6 +63,7 @@
   runButton.addEventListener('click', async () => {
     runButton.disabled = true;
     copyButton.disabled = true;
+    saveSubscriptionButton.disabled = true;
     output.textContent = 'جارٍ الفحص...';
     const report = {
       checkedAt: new Date().toISOString(),
@@ -116,6 +120,8 @@
         hasAuth: Boolean(subscription.toJSON().keys && subscription.toJSON().keys.auth)
       };
       report.subscription = subscription.toJSON();
+      subscriptionJson = JSON.stringify(subscription.toJSON(), null, 2);
+      saveSubscriptionButton.disabled = false;
       report.note = 'احتفظ بهذا التقرير محليًا. لا ترسل endpoint أو keys إلى محادثة عامة.';
       report.result = 'WEB_PUSH_SUBSCRIPTION_CREATED';
       resultText = JSON.stringify(report, null, 2);
@@ -123,6 +129,7 @@
       copyButton.disabled = false;
       setStatus('نجح إنشاء اشتراك Web Push مباشرةً من المتصفح. هذا اختبار تسجيل الاشتراك فقط؛ لم نرسل إشعارًا بعد.', 'ok');
     } catch (error) {
+      saveSubscriptionButton.disabled = true;
       report.result = 'WEB_PUSH_SUBSCRIPTION_FAILED';
       report.error = { name: error && error.name || 'Error', message: error && error.message || String(error) };
       resultText = JSON.stringify(report, null, 2);
@@ -132,6 +139,17 @@
     } finally {
       runButton.disabled = false;
     }
+  });
+
+  saveSubscriptionButton.addEventListener('click', () => {
+    if (!subscriptionJson) return;
+    const blob = new Blob([subscriptionJson], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'subscription.json';
+    link.click();
+    URL.revokeObjectURL(url);
   });
 
   copyButton.addEventListener('click', async () => {

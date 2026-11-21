@@ -361,6 +361,13 @@ export default {
       }
 
 
+      if (path === "/admin/campaigns/latest" && request.method === "GET") {
+        const auth=await requireUser(request,env);
+        if(auth.response) return auth.response;
+        const campaign=await env.DB.prepare("SELECT * FROM notification_campaigns ORDER BY created_at DESC LIMIT 1").first();
+        return json({success:true,campaign:campaign||null});
+      }
+
       if (path === "/admin/campaigns" && request.method === "POST") {
         const auth = await requireUser(request, env);
         if (auth.response) return auth.response;
@@ -372,15 +379,17 @@ export default {
         const targetUrl = typeof body.url === "string" && body.url.startsWith("/") && !body.url.startsWith("//")
           ? body.url : "/AlJoud_Coffee/";
         const id=randomHex(16);
-        await env.DB.prepare(`
-          INSERT INTO notification_campaigns (id,title,body,target_url,state,total,actor_user_id,next_run_at)
-          SELECT ?,?,?,?,'queued',COUNT(*),?,datetime('now')
-          FROM push_subscriptions WHERE enabled=1
-        `).bind(id,body.title.trim(),body.body.trim(),targetUrl,auth.user.id).run();
-        await env.DB.prepare(`
-          INSERT INTO campaign_recipients (campaign_id,subscription_id,endpoint,p256dh,auth,state)
-          SELECT ?,id,endpoint,p256dh,auth,'pending' FROM push_subscriptions WHERE enabled=1
-        `).bind(id).run();
+        await env.DB.batch([
+          env.DB.prepare(`
+            INSERT INTO notification_campaigns (id,title,body,target_url,state,total,actor_user_id,next_run_at)
+            SELECT ?,?,?,?,'queued',COUNT(*),?,datetime('now')
+            FROM push_subscriptions WHERE enabled=1
+          `).bind(id,body.title.trim(),body.body.trim(),targetUrl,auth.user.id),
+          env.DB.prepare(`
+            INSERT INTO campaign_recipients (campaign_id,subscription_id,endpoint,p256dh,auth,state)
+            SELECT ?,id,endpoint,p256dh,auth,'pending' FROM push_subscriptions WHERE enabled=1
+          `).bind(id)
+        ]);
         const campaign=await env.DB.prepare("SELECT * FROM notification_campaigns WHERE id=?").bind(id).first();
         if(!campaign.total){
           await env.DB.prepare("UPDATE notification_campaigns SET state='completed',completed_at=CURRENT_TIMESTAMP,next_run_at=NULL WHERE id=?").bind(id).run();

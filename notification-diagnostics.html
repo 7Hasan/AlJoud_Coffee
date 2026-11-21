@@ -47,7 +47,17 @@
       const elapsed = Math.round(performance.now() - started);
       let body = '';
       try { body = (await response.text()).slice(0, 350).replace(/[\r\n\t]+/g, ' '); } catch (_) {}
-      return { ok: response.ok, status: response.status, statusText: response.statusText, responseType: response.type, elapsedMs: elapsed, body };
+      return {
+        ok: response.ok,
+        // A resolved no-cors fetch returns an opaque response by design.
+        // It proves the browser completed the request, not that the server returned HTTP 200.
+        transportReached: response.type === 'opaque' || response.status > 0,
+        status: response.status,
+        statusText: response.statusText,
+        responseType: response.type,
+        elapsedMs: elapsed,
+        body
+      };
     } catch (error) {
       return { ok: false, errorName: error && error.name || 'Error', errorMessage: error && error.message || String(error), elapsedMs: Math.round(performance.now() - started) };
     } finally {
@@ -102,8 +112,15 @@
     const get = report.tests.installationsGet;
     const post = report.tests.installationsPostPreflight;
     report.interpretation = post && typeof post.status === 'number'
-      ? 'وصل طلب POST إلى Firebase وتجاوز CORS preflight؛ راجع حالة HTTP وتفاصيل الرد أدناه.'
-      : 'لم نحصل على استجابة HTTP لطلب POST. قد يكون السبب CORS preflight أو اتصالًا/حظرًا على مستوى المتصفح؛ التقرير لا يثبت أيًّا منهما وحده.';
+      ? 'وصل طلب POST إلى Firebase وتلقى استجابة HTTP؛ راجع الحالة والتفاصيل أدناه.'
+      : 'لم تصل استجابة HTTP لطلب POST. إذا فشل أيضًا طلب no-cors برسالة Failed to fetch، فهذا يرجّح فشل الوصول إلى النطاق قبل استلام HTTP، لكنه لا يحدد وحده هل السبب DNS أم حظر/اتصال.';
+    const control = report.tests.controlHostReachability;
+    const opaqueFirebase = report.tests.installationsOpaqueReachability;
+    report.transportSummary = {
+      controlHostReached: Boolean(control && control.transportReached),
+      firebaseInstallationsHostReached: Boolean(opaqueFirebase && opaqueFirebase.transportReached),
+      note: 'استجابة opaque تعني أن طلب no-cors اكتمل لكن المتصفح أخفى تفاصيل الرد؛ لا تعني نجاح HTTP أو نجاح Firebase.'
+    };
     if (get && typeof get.status === 'number') {
       report.getInterpretation = 'استجابة GET وصلت من الخادم. هذا يثبت إمكانية قراءة استجابة من النطاق، لكنه لا يثبت نجاح طلب POST.';
     } else {

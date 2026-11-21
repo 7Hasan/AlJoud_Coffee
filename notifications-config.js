@@ -19,3 +19,6 @@ window.ALJOUD_FIREBASE_CONFIG = {
 };
 
 window.ALJOUD_VAPID_PUBLIC_KEY = "BNTM9S-vQEjifs7N4c475q0dcg-ZccrvsRSG5sjv_JXJvYvaIpCBpo3Xlwy6Hdk4vZVPCe3PggwCI5SNx_LFBUw";
+
+// Separate VAPID key pair for the Cloudflare Web Push service (not Firebase FCM).
+window.ALJOUD_WEB_PUSH_VAPID_PUBLIC_KEY = "BGAwllfek6gAqKlNWXGPZd5l8StuTPQpP6Vf95D1hRRQV9OpbPh6FJOag30qF8VKSU-Ct7yLqE5PFE8tPTvOBeQ";

@@ -179,7 +179,96 @@ async function sendPush(message, env, actorId) {
   return { result };
 }
 
+
+async function deliverCampaignRecipient(row, campaign, env) {
+  try {
+    const subscription = { endpoint: row.endpoint, expirationTime: null, keys: { p256dh: row.p256dh, auth: row.auth } };
+    const payload = await buildPushPayload({
+      data: JSON.stringify({ title: campaign.title, body: campaign.body, url: campaign.target_url }),
+      options: { ttl: 3600 }
+    }, subscription, {
+      subject: env.VAPID_SUBJECT, publicKey: env.VAPID_PUBLIC_KEY, privateKey: env.VAPID_PRIVATE_KEY
+    });
+    const response = await fetch(row.endpoint, payload);
+    if (response.status === 404 || response.status === 410) {
+      await env.DB.prepare("DELETE FROM push_subscriptions WHERE id=?").bind(row.subscription_id).run();
+      return "expired";
+    }
+    return response.ok ? "sent" : "failed";
+  } catch (error) {
+    console.error("Campaign push error:", error);
+    return "failed";
+  }
+}
+
+async function processCampaign(env, campaignId) {
+  const lock = await env.DB.prepare(`
+    UPDATE notification_campaigns
+    SET state='running', lock_until=datetime('now','+4 minutes'), updated_at=CURRENT_TIMESTAMP
+    WHERE id=? AND next_run_at<=datetime('now')
+      AND (state='queued' OR (state='running' AND (lock_until IS NULL OR lock_until<datetime('now'))))
+  `).bind(campaignId).run();
+  if (!lock.meta?.changes) return;
+
+  const campaign = await env.DB.prepare("SELECT * FROM notification_campaigns WHERE id=?").bind(campaignId).first();
+  if (!campaign) return;
+  const { results } = await env.DB.prepare(`
+    SELECT id,subscription_id,endpoint,p256dh,auth FROM campaign_recipients
+    WHERE campaign_id=? AND state='pending' ORDER BY id LIMIT ?
+  `).bind(campaignId, MAX_BATCH).all();
+
+  for (let i=0; i<results.length; i+=6) {
+    const group=results.slice(i,i+6);
+    await Promise.all(group.map(async row=>{
+      const outcome=await deliverCampaignRecipient(row,campaign,env);
+      await env.DB.prepare("UPDATE campaign_recipients SET state=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND state='pending'")
+        .bind(outcome,row.id).run();
+    }));
+  }
+
+  const totals=await env.DB.prepare(`
+    SELECT COUNT(*) AS processed,
+      SUM(CASE WHEN state='sent' THEN 1 ELSE 0 END) AS sent,
+      SUM(CASE WHEN state='failed' THEN 1 ELSE 0 END) AS failed,
+      SUM(CASE WHEN state='expired' THEN 1 ELSE 0 END) AS expired,
+      SUM(CASE WHEN state='pending' THEN 1 ELSE 0 END) AS pending
+    FROM campaign_recipients WHERE campaign_id=?
+  `).bind(campaignId).first();
+  const pending=totals?.pending||0;
+  if(pending>0){
+    await env.DB.prepare(`
+      UPDATE notification_campaigns SET state='queued',processed=?,sent=?,failed=?,expired=?,
+        next_run_at=datetime('now','+5 minutes'),lock_until=NULL,updated_at=CURRENT_TIMESTAMP
+      WHERE id=? AND state='running'
+    `).bind(totals.processed||0,totals.sent||0,totals.failed||0,totals.expired||0,campaignId).run();
+  }else{
+    const failed=(totals?.failed||0)+(totals?.expired||0);
+    await env.DB.prepare(`
+      UPDATE notification_campaigns SET state=?,processed=?,sent=?,failed=?,expired=?,
+        next_run_at=NULL,lock_until=NULL,completed_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP
+      WHERE id=? AND state='running'
+    `).bind(failed?'completed_with_failures':'completed',totals.processed||0,totals.sent||0,totals.failed||0,totals.expired||0,campaignId).run();
+    await env.DB.prepare(`
+      INSERT INTO notification_logs (title,body,target_url,processed,sent,failed,expired,actor_user_id)
+      VALUES (?,?,?,?,?,?,?,?)
+    `).bind(campaign.title,campaign.body,campaign.target_url,totals.processed||0,totals.sent||0,totals.failed||0,totals.expired||0,campaign.actor_user_id||null).run();
+  }
+}
+
+async function runCampaignScheduler(env) {
+  const { results } = await env.DB.prepare(`
+    SELECT id FROM notification_campaigns
+    WHERE next_run_at<=datetime('now')
+      AND (state='queued' OR (state='running' AND (lock_until IS NULL OR lock_until<datetime('now'))))
+    ORDER BY created_at ASC LIMIT 5
+  `).all();
+  for (const row of results) await processCampaign(env,row.id);
+}
+
 export default {
+  async scheduled(controller, env) {
+    await runCampaignScheduler(env);
+  },
   async fetch(request, env) {
     const origin = request.headers.get("Origin");
     if (origin && origin !== ALLOWED_ORIGIN) return json({ error: "Origin not allowed" }, 403);
@@ -269,6 +358,43 @@ export default {
           await env.DB.prepare("DELETE FROM admin_sessions WHERE token_hash=?").bind(await sha256(token)).run();
         }
         return json({ success: true });
+      }
+
+
+      if (path === "/admin/campaigns" && request.method === "POST") {
+        const auth = await requireUser(request, env);
+        if (auth.response) return auth.response;
+        const body = await readJson(request, 5000);
+        if (typeof body.title !== "string" || typeof body.body !== "string" ||
+            !body.title.trim() || !body.body.trim() || body.title.length>100 || body.body.length>500) {
+          return json({ error: "تحقق من عنوان ونص الإشعار" }, 400);
+        }
+        const targetUrl = typeof body.url === "string" && body.url.startsWith("/") && !body.url.startsWith("//")
+          ? body.url : "/AlJoud_Coffee/";
+        const id=randomHex(16);
+        await env.DB.prepare(`
+          INSERT INTO notification_campaigns (id,title,body,target_url,state,total,actor_user_id,next_run_at)
+          SELECT ?,?,?,?,'queued',COUNT(*),?,datetime('now')
+          FROM push_subscriptions WHERE enabled=1
+        `).bind(id,body.title.trim(),body.body.trim(),targetUrl,auth.user.id).run();
+        await env.DB.prepare(`
+          INSERT INTO campaign_recipients (campaign_id,subscription_id,endpoint,p256dh,auth,state)
+          SELECT ?,id,endpoint,p256dh,auth,'pending' FROM push_subscriptions WHERE enabled=1
+        `).bind(id).run();
+        const campaign=await env.DB.prepare("SELECT * FROM notification_campaigns WHERE id=?").bind(id).first();
+        if(!campaign.total){
+          await env.DB.prepare("UPDATE notification_campaigns SET state='completed',completed_at=CURRENT_TIMESTAMP,next_run_at=NULL WHERE id=?").bind(id).run();
+        }
+        return json({ success:true, campaign: await env.DB.prepare("SELECT * FROM notification_campaigns WHERE id=?").bind(id).first() },202);
+      }
+
+      if (path.startsWith("/admin/campaigns/") && request.method === "GET") {
+        const auth=await requireUser(request,env);
+        if(auth.response) return auth.response;
+        const id=decodeURIComponent(path.slice("/admin/campaigns/".length));
+        const campaign=await env.DB.prepare("SELECT * FROM notification_campaigns WHERE id=?").bind(id).first();
+        if(!campaign) return json({error:"الحملة غير موجودة"},404);
+        return json({success:true,campaign});
       }
 
       if (path === "/admin/send" && request.method === "POST") {

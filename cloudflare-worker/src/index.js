@@ -3,7 +3,7 @@ import { buildPushPayload } from "@block65/webcrypto-web-push";
 const ALLOWED_ORIGIN = "https://7hasan.github.io";
 const MAX_BATCH = 40;
 const SESSION_DAYS = 7;
-const PASSWORD_ITERATIONS = 210000;
+const PASSWORD_ITERATIONS = 100000;
 
 function json(data, status = 200, origin = ALLOWED_ORIGIN) {
   return new Response(JSON.stringify(data), {

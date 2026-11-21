@@ -234,6 +234,7 @@ class CafeApp {
             return;
         }
         if (lastChoiceAt) {
+            localStorage.setItem('aljoud_notification_choice_at', String(Date.now()));
             this.hidePermissionFlow();
             this.showNotificationReminder();
             return;
@@ -521,8 +522,8 @@ class CafeApp {
             console.error('AlJoud Web Push subscription failed:', error);
             this.webPushVerified = false;
             this.updateNotificationStatus();
-            this.setNotificationPermissionHint('تعذر التفعيل. حاول مرة أخرى.');
             this.showPermissionStep('notifications');
+            this.setNotificationPermissionHint('تعذر التفعيل. حاول مرة أخرى.');
             return false;
         }
     }

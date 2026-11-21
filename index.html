@@ -61,24 +61,6 @@
             <p class="text-xs md:text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-lg mx-auto">سواء تحب الكيف الثقيل ولا الحلا اللي يروق الجو، جهزنا لك كل شي يفتح النفس ويزين جلستك.</p>
         </section>
 
-        <!-- إشعارات الجود -->
-        <section class="bg-white dark:bg-[#171513] border border-amber-500/20 p-5 rounded-3xl shadow-sm space-y-3">
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center"><i class="fa-solid fa-bell text-lg"></i></div>
-                <div class="flex-1">
-                    <h3 class="font-black text-sm text-slate-800 dark:text-white">خلّك قريب من الجود ❤️</h3>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400">أخبارنا الحلوة توصلك، بدون إزعاج.</p>
-                </div>
-            </div>
-            <p id="notificationStatus" class="text-[11px] text-slate-500 dark:text-slate-400" aria-live="polite">يمكنك تفعيل إشعارات الجود على هذا الجهاز.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <button id="enableNotificationsBtn" type="button" class="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white px-4 py-3 rounded-xl text-xs font-bold transition"><i class="fa-solid fa-bell ml-1"></i> فعّل إشعارات الجود</button>
-                <button id="enableNearbyBtn" type="button" disabled class="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 px-4 py-3 rounded-xl text-xs font-bold transition disabled:opacity-50"><i class="fa-solid fa-location-dot ml-1"></i> تنبيه الاقتراب — بانتظار موقع الكافي</button>
-                <button id="copyFcmTokenBtn" type="button" class="hidden sm:col-span-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 px-4 py-3 rounded-xl text-xs font-bold transition"><i class="fa-solid fa-copy ml-1"></i> نسخ رمز الجهاز لاختبار الإشعارات</button>
-            </div>
-            <p class="text-[10px] leading-relaxed text-slate-400 dark:text-slate-500">تنبيه الاقتراب يعمل فقط أثناء فتح الموقع وبعد موافقتك على مشاركة الموقع. لا نحتفظ بإحداثياتك.</p>
-        </section>
-
         <!-- الخدمات -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div class="bg-white dark:bg-[#171513] border border-slate-200 dark:border-white/5 p-4 rounded-3xl text-center space-y-1 shadow-sm">
@@ -306,6 +288,53 @@
             <p class="text-xs text-slate-500 dark:text-slate-400">كيف مزاجك اليوم؟ اختر حالتك ونزبطك بحب :</p>
             <div class="space-y-2.5" id="moodOptionsList"></div>
             <button onclick="app.closeMoodModal()" class="w-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 py-3 rounded-2xl text-xs font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition">إغلاق</button>
+        </div>
+    </div>
+
+
+    <!-- تدفق تفعيل خدمات الجود -->
+    <div id="permissionFlowModal" class="fixed inset-0 bg-black/75 backdrop-blur-md z-[80] hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="permissionFlowTitle">
+        <div class="w-full max-w-sm rounded-[2rem] border border-amber-500/20 bg-white p-6 text-center shadow-2xl animate-in dark:bg-[#181614]">
+            <section id="permissionLocationStep" class="space-y-5">
+                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    <i class="fa-solid fa-location-dot text-2xl"></i>
+                </div>
+                <h2 id="permissionFlowTitle" class="text-base font-black text-slate-900 dark:text-white">فعّل خدمة الموقع الجغرافي</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="locationAllowBtn" type="button" class="rounded-xl bg-amber-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-amber-500">السماح</button>
+                    <button id="locationDenyBtn" type="button" class="rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">عدم السماح</button>
+                </div>
+            </section>
+
+            <section id="permissionNotificationsStep" class="hidden space-y-5">
+                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    <i class="fa-solid fa-bell text-2xl"></i>
+                </div>
+                <h2 class="text-base font-black text-slate-900 dark:text-white">فعّل إشعارات الجود</h2>
+                <p id="notificationPermissionHint" class="hidden text-xs text-slate-500 dark:text-slate-400">فعّل الإشعارات من إعدادات Chrome.</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="notificationAllowBtn" type="button" class="rounded-xl bg-amber-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-amber-500">السماح</button>
+                    <button id="notificationDenyBtn" type="button" class="rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">عدم السماح</button>
+                </div>
+            </section>
+
+            <section id="permissionWelcomeStep" class="hidden space-y-5">
+                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    <i class="fa-solid fa-check text-2xl"></i>
+                </div>
+                <h2 class="text-base font-black text-slate-900 dark:text-white">يا هلا بك في الجود ❤️</h2>
+                <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">من اليوم توصلك عروضنا وخدماتنا أول بأول.</p>
+                <button id="permissionWelcomeCloseBtn" type="button" class="w-full rounded-xl bg-amber-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-amber-500">متابعة</button>
+            </section>
+        </div>
+    </div>
+
+    <div id="notificationReminder" class="fixed bottom-24 left-4 right-4 z-[60] mx-auto hidden max-w-md rounded-2xl border border-amber-500/20 bg-white p-3 shadow-2xl dark:bg-[#181614]" role="status">
+        <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400"><i class="fa-solid fa-bell"></i></div>
+            <p class="flex-1 text-xs font-bold text-slate-800 dark:text-white">فعّل إشعارات الجود ☕</p>
+            <button id="notificationReminderEnable" type="button" class="rounded-lg bg-amber-600 px-3 py-2 text-xs font-bold text-white">تفعيل</button>
+            <button id="notificationReminderLater" type="button" class="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600 dark:bg-white/5 dark:text-slate-300">لاحقًا</button>
         </div>
     </div>
 

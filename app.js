@@ -152,6 +152,8 @@ class CafeApp {
 
             if (state === 'granted' || state === 'denied' || !('geolocation' in navigator)) {
                 localStorage.setItem(locationKey, state === 'prompt' ? 'unavailable' : state);
+                if (state === 'granted') localStorage.setItem('aljoud_nearby_enabled', 'true');
+                else if (state === 'denied') localStorage.removeItem('aljoud_nearby_enabled');
             } else {
                 this.showPermissionStep('location');
                 return;
@@ -186,6 +188,12 @@ class CafeApp {
 
     finishLocationFlow(choice) {
         localStorage.setItem('aljoud_location_choice_v1', choice);
+        if (choice === 'granted') {
+            localStorage.setItem('aljoud_nearby_enabled', 'true');
+        } else {
+            localStorage.removeItem('aljoud_nearby_enabled');
+            this.stopProximityMonitoring();
+        }
         this.startNotificationPermissionFlow();
     }
 
@@ -209,6 +217,7 @@ class CafeApp {
                     this.hidePermissionFlow();
                     this.hideNotificationReminder();
                     this.updateNotificationStatus();
+                    if (localStorage.getItem('aljoud_nearby_enabled') === 'true') this.startProximityMonitoring();
                     return;
                 }
             } catch (error) {
@@ -505,6 +514,7 @@ class CafeApp {
             localStorage.removeItem('aljoud_notification_choice_at');
             this.hideNotificationReminder();
             this.updateNotificationStatus();
+            if (localStorage.getItem('aljoud_nearby_enabled') === 'true') this.startProximityMonitoring();
             this.showPermissionStep('welcome');
             return true;
         } catch (error) {

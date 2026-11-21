@@ -23,6 +23,8 @@ class CafeApp {
         this.notificationRegistration = null;
         this.messaging = null;
         this.fcmToken = localStorage.getItem('aljoud_fcm_token') || null;
+        this.notificationSubscriptionVerified = false;
+        this.notificationVerificationInProgress = false;
         this.init();
     }
 
@@ -77,6 +79,52 @@ class CafeApp {
         this.updateNotificationStatus();
         if ('Notification' in window && Notification.permission === 'granted' && this.fcmToken) {
             this.showFcmTokenControl();
+            // A locally cached token is not proof that the subscription is still valid.
+            this.verifyFcmSubscription();
+        }
+    }
+
+    async verifyFcmSubscription() {
+        if (this.notificationVerificationInProgress || !('Notification' in window) || Notification.permission !== 'granted') return false;
+        this.notificationVerificationInProgress = true;
+        this.notificationSubscriptionVerified = false;
+        this.updateNotificationStatus();
+
+        try {
+            const registration = this.notificationRegistration || await navigator.serviceWorker.ready;
+            this.notificationRegistration = registration;
+            const messaging = await this.initializeFirebaseMessaging();
+            const currentToken = await messaging.getToken({
+                vapidKey: window.ALJOUD_VAPID_PUBLIC_KEY,
+                serviceWorkerRegistration: registration
+            });
+            if (!currentToken || currentToken !== this.fcmToken) {
+                this.fcmToken = currentToken || null;
+                if (currentToken) localStorage.setItem('aljoud_fcm_token', currentToken);
+                else localStorage.removeItem('aljoud_fcm_token');
+                this.notificationSubscriptionVerified = false;
+                return false;
+            }
+
+            const auth = firebase.auth();
+            if (!auth.currentUser) await auth.signInAnonymously();
+            const user = auth.currentUser;
+            if (!user) throw new Error('تعذر التحقق من هوية الجهاز في Firebase.');
+
+            const snapshot = await firebase.firestore()
+                .collection('notificationSubscriptions')
+                .doc(user.uid)
+                .get();
+            const saved = snapshot.exists ? snapshot.data() : null;
+            this.notificationSubscriptionVerified = Boolean(saved && saved.enabled === true && saved.token === currentToken);
+            return this.notificationSubscriptionVerified;
+        } catch (error) {
+            console.warn('Could not verify the saved FCM subscription:', error);
+            this.notificationSubscriptionVerified = false;
+            return false;
+        } finally {
+            this.notificationVerificationInProgress = false;
+            this.updateNotificationStatus();
         }
     }
 
@@ -187,8 +235,16 @@ class CafeApp {
             return;
         }
         if (Notification.permission === 'granted') {
-            status.textContent = this.fcmToken ? 'إشعارات الجود مفعّلة على هذا الجهاز.' : 'الإذن مسموح؛ أكمل ربط هذا الجهاز بإشعارات الجود.';
-            if (enableButton) enableButton.textContent = 'الإشعارات مسموحة ✓';
+            if (this.notificationSubscriptionVerified) {
+                status.textContent = 'تم التحقق من اشتراك إشعارات الجود على هذا الجهاز.';
+            } else if (this.notificationVerificationInProgress) {
+                status.textContent = 'جارٍ التحقق من اشتراك الإشعارات لهذا الجهاز…';
+            } else if (this.fcmToken) {
+                status.textContent = 'الإذن مسموح، لكن لم يتم التحقق من صلاحية الاشتراك بعد. أعد تفعيل الإشعارات للتحقق.';
+            } else {
+                status.textContent = 'الإذن مسموح؛ أكمل ربط هذا الجهاز بإشعارات الجود.';
+            }
+            if (enableButton) enableButton.textContent = this.notificationSubscriptionVerified ? 'الإشعارات مفعّلة ✓' : 'تحقق / فعّل الإشعارات';
         } else if (Notification.permission === 'denied') {
             status.textContent = 'الإشعارات محظورة من إعدادات المتصفح. يمكنك تغيير الإذن من إعدادات الموقع.';
         } else {
@@ -240,6 +296,7 @@ class CafeApp {
             try {
                 diagnosticStage = 'تسجيل الدخول المجهول وحفظ الاشتراك في Firestore';
                 await this.saveFcmSubscription(token);
+                this.notificationSubscriptionVerified = true;
             } catch (saveError) {
                 console.error('Could not save FCM subscription to Firestore:', saveError);
                 this.updateNotificationStatus();

@@ -21,6 +21,8 @@ class CafeApp {
         this.proximityWatchId = null;
         this.proximityInside = false;
         this.notificationRegistration = null;
+        this.webPushRegistration = null;
+        this.webPushVerified = false;
         this.messaging = null;
         this.fcmToken = localStorage.getItem('aljoud_fcm_token') || null;
         this.notificationSubscriptionVerified = false;
@@ -69,7 +71,7 @@ class CafeApp {
     }
 
     setupNotifications() {
-        document.getElementById('enableNotificationsBtn')?.addEventListener('click', () => this.enableNotifications());
+        document.getElementById('enableNotificationsBtn')?.addEventListener('click', () => this.enableWebPushNotifications());
         document.getElementById('enableNearbyBtn')?.addEventListener('click', () => this.enableNearbyAlerts());
         document.getElementById('copyFcmTokenBtn')?.addEventListener('click', () => this.copyFcmToken());
         document.addEventListener('visibilitychange', () => {
@@ -79,8 +81,6 @@ class CafeApp {
         this.updateNotificationStatus();
         if ('Notification' in window && Notification.permission === 'granted' && this.fcmToken) {
             this.showFcmTokenControl();
-            // A locally cached token is not proof that the subscription is still valid.
-            this.verifyFcmSubscription();
         }
     }
 
@@ -228,31 +228,122 @@ class CafeApp {
         const enableButton = document.getElementById('enableNotificationsBtn');
         const nearbyButton = document.getElementById('enableNearbyBtn');
         if (!status) return;
-        if (!('Notification' in window)) {
+
+        if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
             status.textContent = 'هذا المتصفح لا يدعم إشعارات الويب.';
             if (enableButton) enableButton.disabled = true;
             if (nearbyButton) nearbyButton.disabled = true;
             return;
         }
+
         if (Notification.permission === 'granted') {
-            if (this.notificationSubscriptionVerified) {
-                status.textContent = 'تم التحقق من اشتراك إشعارات الجود على هذا الجهاز.';
-            } else if (this.notificationVerificationInProgress) {
-                status.textContent = 'جارٍ التحقق من اشتراك الإشعارات لهذا الجهاز…';
-            } else if (this.fcmToken) {
-                status.textContent = 'الإذن مسموح، لكن لم يتم التحقق من صلاحية الاشتراك بعد. أعد تفعيل الإشعارات للتحقق.';
+            if (this.webPushVerified) {
+                status.textContent = 'تم تسجيل هذا الجهاز في نظام إشعارات الجود الجديد بنجاح.';
             } else {
-                status.textContent = 'الإذن مسموح؛ أكمل ربط هذا الجهاز بإشعارات الجود.';
+                status.textContent = 'الإذن مسموح. اضغط لتسجيل هذا الجهاز في نظام إشعارات الجود.';
             }
-            if (enableButton) enableButton.textContent = this.notificationSubscriptionVerified ? 'الإشعارات مفعّلة ✓' : 'تحقق / فعّل الإشعارات';
+            if (enableButton) enableButton.textContent = this.webPushVerified ? 'الإشعارات مسجلة ✓' : 'تحقق / فعّل الإشعارات';
         } else if (Notification.permission === 'denied') {
             status.textContent = 'الإشعارات محظورة من إعدادات المتصفح. يمكنك تغيير الإذن من إعدادات الموقع.';
         } else {
             status.textContent = 'فعّل الإشعارات لتستقبل رسائل الجود على هذا الجهاز.';
         }
+
         if (nearbyButton) {
             nearbyButton.disabled = !this.cafeLocation || Notification.permission !== 'granted';
             nearbyButton.textContent = this.cafeLocation ? 'فعّل تنبيه الاقتراب (300م)' : 'تنبيه الاقتراب — بانتظار موقع الكافي';
+        }
+    }
+
+    urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const raw = atob(base64);
+        return Uint8Array.from(raw, (char) => char.charCodeAt(0));
+    }
+
+    async enableWebPushNotifications() {
+        if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+            this.showAlert('الإشعارات غير مدعومة', 'افتح الموقع من متصفح حديث يدعم Web Push.', 'info');
+            return;
+        }
+
+        try {
+            const permission = Notification.permission === 'default'
+                ? await Notification.requestPermission()
+                : Notification.permission;
+
+            if (permission !== 'granted') {
+                this.updateNotificationStatus();
+                this.showAlert('لم يتم تفعيل الإشعارات', 'اسمح بالإشعارات من إعدادات المتصفح ثم أعد المحاولة.', 'info');
+                return;
+            }
+
+            const publicKey = window.ALJOUD_WEB_PUSH_VAPID_PUBLIC_KEY;
+            if (!publicKey) throw new Error('Web Push public key is missing.');
+
+            // Keep the new Web Push subscription isolated from the existing Firebase worker.
+            const registration = await navigator.serviceWorker.register('./webpush/push-sw.js', {
+                scope: './webpush/'
+            });
+            this.webPushRegistration = registration;
+
+            const activeWorker = registration.installing || registration.waiting || registration.active;
+            if (activeWorker && activeWorker.state !== 'activated') {
+                await new Promise((resolve, reject) => {
+                    const onStateChange = () => {
+                        if (activeWorker.state === 'activated') {
+                            activeWorker.removeEventListener('statechange', onStateChange);
+                            resolve();
+                        } else if (activeWorker.state === 'redundant') {
+                            activeWorker.removeEventListener('statechange', onStateChange);
+                            reject(new Error('Web Push service worker became redundant.'));
+                        }
+                    };
+                    activeWorker.addEventListener('statechange', onStateChange);
+                    onStateChange();
+                });
+            }
+
+            let subscription = await registration.pushManager.getSubscription();
+            if (!subscription) {
+                subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: this.urlBase64ToUint8Array(publicKey)
+                });
+            }
+
+            const response = await fetch('https://aljoud-push-api.ese37522.workers.dev/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(subscription.toJSON())
+            });
+
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || `Subscription API returned HTTP ${response.status}`);
+            }
+
+            this.webPushVerified = true;
+            this.updateNotificationStatus();
+            await registration.showNotification('يا هلا بك في الجود ☕', {
+                body: 'تم تسجيل جهازك لاستقبال إشعارات الجود ❤️',
+                icon: '../logo.png',
+                badge: '../logo.png',
+                tag: 'aljoud-webpush-welcome',
+                data: { url: '../index.html' }
+            });
+            this.showAlert('تم تفعيل إشعارات الجود ❤️', 'تم تسجيل هذا الجهاز وحفظ اشتراكه في نظام الإشعارات الجديد بنجاح.', 'success');
+        } catch (error) {
+            console.error('AlJoud Web Push subscription failed:', error);
+            this.webPushVerified = false;
+            this.updateNotificationStatus();
+            this.showAlert(
+                'تعذر تسجيل الإشعارات',
+                `التفاصيل: ${String(error?.message || error).slice(0, 220)}
+إذا استمر الخطأ، أرسل نصه كما ظهر.`,
+                'error'
+            );
         }
     }
 

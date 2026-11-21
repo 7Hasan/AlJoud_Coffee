@@ -70,10 +70,28 @@ class CafeApp {
         });
     }
 
+
     setupNotifications() {
-        document.getElementById('enableNotificationsBtn')?.addEventListener('click', () => this.enableWebPushNotifications());
         document.getElementById('enableNearbyBtn')?.addEventListener('click', () => this.enableNearbyAlerts());
         document.getElementById('copyFcmTokenBtn')?.addEventListener('click', () => this.copyFcmToken());
+
+        document.getElementById('locationAllowBtn')?.addEventListener('click', () => this.requestLocationForFlow());
+        document.getElementById('locationDenyBtn')?.addEventListener('click', () => this.finishLocationFlow('declined'));
+        document.getElementById('notificationAllowBtn')?.addEventListener('click', () => this.requestNotificationsForFlow());
+        document.getElementById('notificationDenyBtn')?.addEventListener('click', () => this.deferNotificationFlow());
+        document.getElementById('permissionWelcomeCloseBtn')?.addEventListener('click', () => this.hidePermissionFlow());
+        document.getElementById('notificationReminderEnable')?.addEventListener('click', () => {
+            this.hideNotificationReminder();
+            this.showPermissionStep('notifications');
+            if ('Notification' in window && Notification.permission === 'denied') {
+                this.setNotificationPermissionHint('فعّل الإشعارات من إعدادات Chrome.');
+            }
+        });
+        document.getElementById('notificationReminderLater')?.addEventListener('click', () => {
+            localStorage.setItem('aljoud_notification_choice_at', String(Date.now()));
+            this.hideNotificationReminder();
+        });
+
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') this.stopProximityMonitoring();
             else if (localStorage.getItem('aljoud_nearby_enabled') === 'true') this.startProximityMonitoring();
@@ -81,6 +99,164 @@ class CafeApp {
         this.updateNotificationStatus();
         if ('Notification' in window && Notification.permission === 'granted' && this.fcmToken) {
             this.showFcmTokenControl();
+        }
+        window.setTimeout(() => this.startPermissionFlow(), 650);
+    }
+
+    showPermissionStep(step) {
+        const modal = document.getElementById('permissionFlowModal');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.getElementById('permissionLocationStep')?.classList.toggle('hidden', step !== 'location');
+        document.getElementById('permissionNotificationsStep')?.classList.toggle('hidden', step !== 'notifications');
+        document.getElementById('permissionWelcomeStep')?.classList.toggle('hidden', step !== 'welcome');
+        const hint = document.getElementById('notificationPermissionHint');
+        if (hint && step === 'notifications' && !hint.dataset.keep) {
+            hint.classList.add('hidden');
+            hint.textContent = '';
+        }
+    }
+
+    hidePermissionFlow() {
+        const modal = document.getElementById('permissionFlowModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    }
+
+    setNotificationPermissionHint(text) {
+        const hint = document.getElementById('notificationPermissionHint');
+        if (!hint) return;
+        hint.textContent = text;
+        hint.classList.remove('hidden');
+    }
+
+    hideNotificationReminder() {
+        document.getElementById('notificationReminder')?.classList.add('hidden');
+    }
+
+    async startPermissionFlow() {
+        const locationKey = 'aljoud_location_choice_v1';
+        if (!localStorage.getItem(locationKey)) {
+            let state = 'prompt';
+            try {
+                if (navigator.permissions?.query) {
+                    const permission = await navigator.permissions.query({ name: 'geolocation' });
+                    state = permission.state;
+                }
+            } catch (error) {
+                console.debug('Geolocation permission state is unavailable:', error);
+            }
+
+            if (state === 'granted' || state === 'denied' || !('geolocation' in navigator)) {
+                localStorage.setItem(locationKey, state === 'prompt' ? 'unavailable' : state);
+            } else {
+                this.showPermissionStep('location');
+                return;
+            }
+        }
+
+        await this.startNotificationPermissionFlow();
+    }
+
+    requestLocationForFlow() {
+        const button = document.getElementById('locationAllowBtn');
+        if (button) button.disabled = true;
+        if (!('geolocation' in navigator)) {
+            this.finishLocationFlow('unavailable');
+            if (button) button.disabled = false;
+            return;
+        }
+
+        // Request permission only from this explicit click; coordinates are not stored or transmitted.
+        navigator.geolocation.getCurrentPosition(
+            () => {
+                if (button) button.disabled = false;
+                this.finishLocationFlow('granted');
+            },
+            (error) => {
+                if (button) button.disabled = false;
+                this.finishLocationFlow(error?.code === 1 ? 'denied' : 'unavailable');
+            },
+            { enableHighAccuracy: false, maximumAge: 60000, timeout: 10000 }
+        );
+    }
+
+    finishLocationFlow(choice) {
+        localStorage.setItem('aljoud_location_choice_v1', choice);
+        this.startNotificationPermissionFlow();
+    }
+
+    async startNotificationPermissionFlow() {
+        if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+            this.hidePermissionFlow();
+            return;
+        }
+
+        if (Notification.permission === 'granted') {
+            try {
+                const registration = await navigator.serviceWorker.getRegistration('./webpush/');
+                const subscription = registration?.pushManager
+                    ? await registration.pushManager.getSubscription()
+                    : null;
+                if (subscription) {
+                    this.webPushRegistration = registration;
+                    this.webPushVerified = true;
+                    localStorage.setItem('aljoud_notification_enabled', 'true');
+                    localStorage.removeItem('aljoud_notification_choice_at');
+                    this.hidePermissionFlow();
+                    this.hideNotificationReminder();
+                    this.updateNotificationStatus();
+                    return;
+                }
+            } catch (error) {
+                console.warn('Could not verify existing Web Push subscription:', error);
+            }
+            this.showPermissionStep('notifications');
+            return;
+        }
+
+        const lastChoiceAt = Number(localStorage.getItem('aljoud_notification_choice_at') || 0);
+        const reminderInterval = 7 * 24 * 60 * 60 * 1000;
+        if (lastChoiceAt && Date.now() - lastChoiceAt < reminderInterval) {
+            this.hidePermissionFlow();
+            return;
+        }
+        if (lastChoiceAt) {
+            this.hidePermissionFlow();
+            this.showNotificationReminder();
+            return;
+        }
+
+        this.showPermissionStep('notifications');
+        if (Notification.permission === 'denied') {
+            this.setNotificationPermissionHint('فعّل الإشعارات من إعدادات Chrome.');
+        }
+    }
+
+    showNotificationReminder() {
+        document.getElementById('notificationReminder')?.classList.remove('hidden');
+    }
+
+    deferNotificationFlow() {
+        localStorage.setItem('aljoud_notification_choice_at', String(Date.now()));
+        localStorage.removeItem('aljoud_notification_enabled');
+        this.hidePermissionFlow();
+    }
+
+    async requestNotificationsForFlow() {
+        if ('Notification' in window && Notification.permission === 'denied') {
+            this.setNotificationPermissionHint('فعّل الإشعارات من إعدادات Chrome.');
+            return;
+        }
+        const button = document.getElementById('notificationAllowBtn');
+        if (button) button.disabled = true;
+        try {
+            await this.enableWebPushNotifications();
+        } finally {
+            if (button) button.disabled = false;
         }
     }
 
@@ -262,10 +438,11 @@ class CafeApp {
         return Uint8Array.from(raw, (char) => char.charCodeAt(0));
     }
 
+
     async enableWebPushNotifications() {
         if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
-            this.showAlert('الإشعارات غير مدعومة', 'افتح الموقع من متصفح حديث يدعم Web Push.', 'info');
-            return;
+            this.setNotificationPermissionHint('الإشعارات غير مدعومة في هذا المتصفح.');
+            return false;
         }
 
         try {
@@ -274,15 +451,15 @@ class CafeApp {
                 : Notification.permission;
 
             if (permission !== 'granted') {
+                localStorage.setItem('aljoud_notification_choice_at', String(Date.now()));
                 this.updateNotificationStatus();
-                this.showAlert('لم يتم تفعيل الإشعارات', 'اسمح بالإشعارات من إعدادات المتصفح ثم أعد المحاولة.', 'info');
-                return;
+                this.hidePermissionFlow();
+                return false;
             }
 
             const publicKey = window.ALJOUD_WEB_PUSH_VAPID_PUBLIC_KEY;
             if (!publicKey) throw new Error('Web Push public key is missing.');
 
-            // Keep the new Web Push subscription isolated from the existing Firebase worker.
             const registration = await navigator.serviceWorker.register('./webpush/push-sw.js', {
                 scope: './webpush/'
             });
@@ -318,32 +495,25 @@ class CafeApp {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(subscription.toJSON())
             });
-
             const result = await response.json().catch(() => ({}));
             if (!response.ok || !result.success) {
                 throw new Error(result.error || `Subscription API returned HTTP ${response.status}`);
             }
 
             this.webPushVerified = true;
+            localStorage.setItem('aljoud_notification_enabled', 'true');
+            localStorage.removeItem('aljoud_notification_choice_at');
+            this.hideNotificationReminder();
             this.updateNotificationStatus();
-            await registration.showNotification('يا هلا بك في الجود ☕', {
-                body: 'تم تسجيل جهازك لاستقبال إشعارات الجود ❤️',
-                icon: '../logo.png',
-                badge: '../logo.png',
-                tag: 'aljoud-webpush-welcome',
-                data: { url: '../index.html' }
-            });
-            this.showAlert('تم تفعيل إشعارات الجود ❤️', 'تم تسجيل هذا الجهاز وحفظ اشتراكه في نظام الإشعارات الجديد بنجاح.', 'success');
+            this.showPermissionStep('welcome');
+            return true;
         } catch (error) {
             console.error('AlJoud Web Push subscription failed:', error);
             this.webPushVerified = false;
             this.updateNotificationStatus();
-            this.showAlert(
-                'تعذر تسجيل الإشعارات',
-                `التفاصيل: ${String(error?.message || error).slice(0, 220)}
-إذا استمر الخطأ، أرسل نصه كما ظهر.`,
-                'error'
-            );
+            this.setNotificationPermissionHint('تعذر التفعيل. حاول مرة أخرى.');
+            this.showPermissionStep('notifications');
+            return false;
         }
     }
 

@@ -39,7 +39,26 @@ $('#bootstrapForm').addEventListener('submit',async e=>{e.preventDefault();const
 $('#showBootstrap').onclick=()=>{$('#loginFormWrap').classList.add('hidden');$('#bootstrapWrap').classList.remove('hidden');};
 $('#showLogin').onclick=()=>{$('#bootstrapWrap').classList.add('hidden');$('#loginFormWrap').classList.remove('hidden');};
 $('#logoutBtn').onclick=async()=>{try{await api('/auth/logout',{method:'POST',body:'{}'});}catch{}sessionStorage.removeItem(tokenKey);location.reload();};
-$('#sendForm').addEventListener('submit',async e=>{e.preventDefault();const form=e.currentTarget;const f=new FormData(form);const btn=e.currentTarget.querySelector('button[type=submit]');if(!confirm('تأكيد إرسال هذا الإشعار إلى جميع المشتركين؟'))return;btn.disabled=true;try{const data=await api('/admin/send',{method:'POST',body:JSON.stringify({title:f.get('title'),body:f.get('body'),url:f.get('url')||'/AlJoud_Coffee/'})});message($('#sendMessage'),'اكتمل الإرسال: عولج '+data.processed+'، نجح '+data.sent+'، فشل '+data.failed+'، اشتراكات منتهية '+data.expired+'.','success');form.reset();$('#titleCount').textContent='0';$('#bodyCount').textContent='0';await loadDashboard($('#rolePill').textContent==='مدير'?'admin':'employee');}catch(err){message($('#sendMessage'),err.message,'error');}finally{btn.disabled=false;}});
+
+let campaignPoll=null;
+const renderCampaign=campaign=>{
+ const root=$('#campaignProgress');if(!root)return;
+ root.classList.remove('hidden');
+ const done=['completed','completed_with_failures'].includes(campaign.state);
+ const pct=campaign.total?Math.min(100,Math.round((campaign.processed/campaign.total)*100)):100;
+ $('#campaignTitle').textContent=campaign.title;
+ $('#campaignState').textContent=campaign.state==='queued'?'بانتظار الدفعة التالية':campaign.state==='running'?'جارٍ الإرسال بالخلفية':campaign.state==='completed'?'اكتملت الحملة':campaign.state==='completed_with_failures'?'اكتملت مع إخفاقات':'—';
+ $('#campaignNumbers').textContent='تمت معالجة '+campaign.processed+' من '+campaign.total+' · نجح '+campaign.sent+' · فشل '+campaign.failed+' · منتهٍ '+campaign.expired;
+ $('#campaignBar').style.width=pct+'%';
+ if(done){if(campaignPoll){clearInterval(campaignPoll);campaignPoll=null;}message($('#sendMessage'),campaign.state==='completed'?'اكتملت الحملة بنجاح.':'اكتملت الحملة، راجع عدد الإخفاقات والاشتراكات المنتهية.','success');}
+};
+const watchCampaign=id=>{
+ if(campaignPoll)clearInterval(campaignPoll);
+ const poll=async()=>{try{const data=await api('/admin/campaigns/'+encodeURIComponent(id));renderCampaign(data.campaign);if(['completed','completed_with_failures'].includes(data.campaign.state))await loadDashboard($('#rolePill').textContent==='مدير'?'admin':'employee');}catch(e){message($('#sendMessage'),'تعذر تحديث حالة الحملة: '+e.message,'error');}};
+ poll();campaignPoll=setInterval(poll,15000);
+};
+$('#sendForm').addEventListener('submit',async e=>{e.preventDefault();const form=e.currentTarget;const f=new FormData(form);const btn=e.currentTarget.querySelector('button[type=submit]');if(!confirm('تأكيد إرسال هذا الإشعار إلى جميع المشتركين؟'))return;btn.disabled=true;try{const data=await api('/admin/campaigns',{method:'POST',body:JSON.stringify({title:f.get('title'),body:f.get('body'),url:f.get('url')||'/AlJoud_Coffee/'})});renderCampaign(data.campaign);watchCampaign(data.campaign.id);message($('#sendMessage'),'تم تأكيد الحملة وبدأت المعالجة بالخلفية. يمكنك إغلاق الصفحة.','success');form.reset();$('#titleCount').textContent='0';$('#bodyCount').textContent='0';await loadDashboard($('#rolePill').textContent==='مدير'?'admin':'employee');}catch(err){message($('#sendMessage'),err.message,'error');}finally{btn.disabled=false;}});
+
 $('#userForm').addEventListener('submit',async e=>{e.preventDefault();const form=e.currentTarget;const f=new FormData(form);const btn=e.currentTarget.querySelector('button');btn.disabled=true;try{const data=await api('/admin/users',{method:'POST',body:JSON.stringify({name:f.get('name'),username:f.get('username'),email:f.get('email'),password:f.get('password'),role:'employee'})});message($('#usersMessage'),'تم إنشاء حساب الموظف: '+data.user.username,'success');form.reset();await loadUsers();}catch(err){message($('#usersMessage'),err.message,'error');}finally{btn.disabled=false;}});
 $('#refreshBtn').onclick=()=>loadDashboard($('#rolePill').textContent==='مدير'?'admin':'employee');
 for(const [field,count] of [['input[name=title]','#titleCount'],['textarea[name=body]','#bodyCount']])$(field).addEventListener('input',e=>$(count).textContent=e.target.value.length);

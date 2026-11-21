@@ -17,6 +17,7 @@ const showDashboard = (user) => {
   $('#userName').textContent=user.name || user.username;$('#rolePill').textContent=user.role==='admin'?'مدير':'موظف';
   $('#usersPanel').classList.toggle('hidden',user.role!=='admin');$('#connection').textContent='متصل';$('#connection').style.color='var(--green)';
   loadDashboard(user.role);
+  restoreCampaign();
 };
 const loadDashboard = async (role) => {
   try{
@@ -51,6 +52,9 @@ const renderCampaign=campaign=>{
  $('#campaignNumbers').textContent='تمت معالجة '+campaign.processed+' من '+campaign.total+' · نجح '+campaign.sent+' · فشل '+campaign.failed+' · منتهٍ '+campaign.expired;
  $('#campaignBar').style.width=pct+'%';
  if(done){if(campaignPoll){clearInterval(campaignPoll);campaignPoll=null;}message($('#sendMessage'),campaign.state==='completed'?'اكتملت الحملة بنجاح.':'اكتملت الحملة، راجع عدد الإخفاقات والاشتراكات المنتهية.','success');}
+};
+const restoreCampaign=async()=>{
+ try{const data=await api('/admin/campaigns/latest');if(!data.campaign)return;renderCampaign(data.campaign);if(['queued','running'].includes(data.campaign.state))watchCampaign(data.campaign.id);}catch(e){console.warn('Could not restore campaign status:',e);}
 };
 const watchCampaign=id=>{
  if(campaignPoll)clearInterval(campaignPoll);
